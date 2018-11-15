@@ -64,7 +64,7 @@ class DeliveryOrderUpdate(Resource):
 
     def put(self, parcelId):
         """Cancel a delivery order"""
-        result = self.orders_db.cancel_order(parcelId)
+        result = self.orders_db.update_order(parcelId, 'status', 'canceled')
 
         return make_response(jsonify(result))
 

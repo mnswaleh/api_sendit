@@ -76,9 +76,10 @@ class UserOrders(Resource):
 
     def get(self, userId):
         """ Fetch all delivery orders created by a specific user"""
-        result = self.orders_db.get_user_orders(userId)
+        # result = self.orders_db.get_user_orders(userId)
 
-        return make_response(jsonify({"Title": "Delivery orders by user " + str(userId), "Delivery orders list": result}))
+        # return make_response(jsonify({"Title": "Delivery orders by user " + str(userId), "Delivery orders list": result}))
+        pass
 
 
 class UserDeliveredOrders(Resource):

@@ -56,9 +56,8 @@ class OrdersModel():
             item_resp = {}
             for i, key in enumerate(curr.description):
                 item_resp[key[0]] = row[i]
-                
-            response.append(item_resp)
 
+            response.append(item_resp)
 
         return response
 
@@ -71,7 +70,7 @@ class OrdersModel():
         curr.execute(query)
 
         data = curr.fetchone()
-    
+
         if not data:
             result = {"message": "order unknown"}
         else:
@@ -80,15 +79,21 @@ class OrdersModel():
 
         return result
 
-    def cancel_order(self, order_id):
+    def update_order(self, order_id, update_col, col_val):
         """Cancel delivery order"""
         result = {}
+        update_column = ""
+
+        if update_col == 'status':
+            update_column = "status='{}'".format(col_val)
+
         if_exist = self.get_order(order_id)
-    
+
         if "message" in if_exist:
             result = {"message": "order unknown"}
         else:
-            query = "UPDATE orders SET status='canceled' WHERE order_no={}".format(order_id)
+            query = "UPDATE orders SET {} WHERE order_no={}".format(
+                update_column, order_id)
             curr = self.order_db.cursor()
             curr.execute(query)
 
@@ -98,14 +103,18 @@ class OrdersModel():
 
     def change_delivery(self, order_id, delivery_location):
         """change delivery location"""
-        result = {"message": "order unknown"}
+        result = {}
+        if_exist = self.get_order(order_id)
 
-        for order in self.order_db:
-            if order['order no'] == order_id:
-                order['delivery location'] = delivery_location
-                result = {"message": "order " + order_id +
-                                     " Delivery location changed!", "Order " + order_id: order}
-                break
+        if "message" in if_exist:
+            result = {"message": "order unknown"}
+        else:
+            query = "UPDATE orders SET status='{}' WHERE order_no={}".format(
+                delivery_location, order_id)
+            curr = self.order_db.cursor()
+            curr.execute(query)
+
+            result = self.get_order(order_id)
 
         return result
 
