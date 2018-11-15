@@ -105,20 +105,25 @@ class OrdersModel():
 
         return result
 
-    # def get_user_orders(self, user_id):
-    #     """Get orders created by specific order"""
-    #     users = self.users_db.get_users()
+    def get_user_orders(self, user_id):
+        """Get orders created by specific order"""
+        query = "SELECT * FROM orders WHERE sender={}".format(user_id)
 
-    #     user_orders = []
-    #     for order in self.order_db:
-    #         if order['sender'] == user_id:
-    #             for user in users:
-    #                 if user['user id'] == order['sender']:
-    #                     order['sender'] = user['username']
-    #                     break
-    #             user_orders.append(order)
+        curr = self.order_db.cursor()
+        curr.execute(query)
 
-    #     return user_orders
+        data = curr.fetchall()
+
+        response = []
+
+        for row in data:
+            item_resp = {}
+            for i, key in enumerate(curr.description):
+                item_resp[key[0]] = row[i]
+
+            response.append(item_resp)
+
+        return response
 
     def get_delivered_orders(self, user_id):
         """Get delivered orders for a specific user"""
