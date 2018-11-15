@@ -1,5 +1,7 @@
 """Users Module"""
+from flask_jwt_extended import create_access_token
 from app.db_config import init_db
+
 
 class UsersModel():
     """Create Users Model"""
@@ -30,8 +32,10 @@ class UsersModel():
         curr.execute(query, user)
 
         self.user_db.commit()
+        access_token = create_access_token(
+            identity=[user['username'], user['password']])
 
-        return user
+        return {"access:": access_token, "user:": user}
 
     def get_user(self, user_id):
         """Get a specific user from the database"""
@@ -54,7 +58,8 @@ class UsersModel():
     def user_login(self, username, password):
         """User login method"""
         result = {}
-        query = "SELECT * FROM users WHERE username='{}' and password='{}'".format(username, password)
+        query = "SELECT * FROM users WHERE username='{}' and password='{}'".format(
+            username, password)
 
         curr = self.user_db.cursor()
         curr.execute(query)
