@@ -39,7 +39,7 @@ class TestDeliveryOrders(unittest.TestCase):
     def test_create_user(self):
         """Test endpoint to create user"""
         response = self.app.post(
-            '/api/v1/users', data=json.dumps(self.user_data), content_type='application/json')
+            '/api/v1/auth/signup', data=json.dumps(self.user_data), content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
         result = json.loads(response.data)
@@ -49,7 +49,7 @@ class TestDeliveryOrders(unittest.TestCase):
         """Test endpoint to signin user"""
         user_login = self.user_data
         response = self.app.post(
-            '/api/v1/users/signin', data=json.dumps({"username": user_login['username'], "password": user_login['password']}), content_type='application/json')
+            '/api/v1/auth/login', data=json.dumps({"username": user_login['username'], "password": user_login['password']}), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
@@ -112,21 +112,30 @@ class TestDeliveryOrders(unittest.TestCase):
         result = json.loads(response.data)
         self.assertIn('canceled', str(result))
 
-    def test_edit_delivery_order(self):
-        """Test endpoint to edit delivery order"""
+    def test_edit_current_location(self):
+        """Test endpoint to change current location"""
         response = self.app.put(
-            '/api/v1/parcels/588356', data=json.dumps(self.edit_data), content_type='application/json')
+            '/api/v1/parcels/588356/presentLocation', data=json.dumps(self.edit_data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
         self.assertIn('kikuyu', str(result))
+
+    def test_edit_status(self):
+        """Test endpoint to change status"""
+        response = self.app.put(
+            '/api/v1/parcels/588356/status', data=json.dumps(self.edit_data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        result = json.loads(response.data)
+        self.assertIn('in transit', str(result))
 
     def test_change_delivery_location(self):
         """Test endpoint to change delivery location"""
         self.test_create_order()
 
         response = self.app.put(
-            '/api/v1/parcels/588356/change-delivery', data=json.dumps(self.edit_data), content_type='application/json')
+            '/api/v1/parcels/588356/destination', data=json.dumps(self.edit_data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
