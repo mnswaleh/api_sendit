@@ -102,8 +102,8 @@ class DeliveryOrderLocation(Resource):
         if data_validation != "ok":
             return make_response(jsonify({"Error": data_validation}), 400)
         else:
-            result = orders_db.change_location(
-                parcelId, data['current location'])
+            result = orders_db.update_order(
+                parcelId, 'location', data['current location'])
 
             return make_response(jsonify(result))
 
@@ -121,7 +121,7 @@ class DeliveryOrderStatus(Resource):
         if data_validation != "ok":
             return make_response(jsonify({"Error": data_validation}), 400)
         else:
-            result = orders_db.change_status(
-                parcelId, data['status'])
+            result = orders_db.update_order(
+                parcelId, 'status', data['status'])
 
             return make_response(jsonify(result))
