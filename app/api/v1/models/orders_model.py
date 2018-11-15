@@ -52,26 +52,33 @@ class OrdersModel():
 
         data = curr.fetchall()
 
-        resp = []
+        response = []
 
         for row in data:
             item_resp = {}
             for i, key in enumerate(curr.description):
                 item_resp[key[0]] = row[i]
                 
-            resp.append(item_resp)
+            response.append(item_resp)
 
 
-        return resp
+        return response
 
     def get_order(self, order_id):
         """Get a specific order from database"""
-        result = {"message": "order unknown"}
+        result = {}
+        query = "SELECT * FROM orders"
+
+        curr = self.order_db.cursor()
+        curr.execute(query)
+
+        data = curr.fetchone()
     
-        for order in self.order_db:
-            if order['order no'] == order_id:
-                result = order
-                break
+        if not data:
+            result = {"message": "order unknown"}
+        else:
+            for i, key in enumerate(curr.description):
+                result[key[0]] = data[i]
 
         return result
 
