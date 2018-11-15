@@ -97,3 +97,15 @@ class UserDeliveredOrders(Resource):
         return make_response(jsonify({"Delivered orders for user" + str(userId): result}))
 
 
+class UserOrdersInTransit(Resource):
+    """User object to fetch orders in transit for a specific user"""
+
+    def __init__(self):
+        self.users_db = UsersModel()
+        self.orders_db = OrdersModel()
+
+    def get(self, userId):
+        """Fetch delivery orders in transit for a specific user"""
+        result = self.orders_db.get_order_amount(userId, 'in-transit')
+
+        return make_response(jsonify({"Orders in-transit for user" + str(userId): result}))
