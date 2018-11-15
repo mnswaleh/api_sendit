@@ -123,22 +123,21 @@ class OrdersModel():
     def get_order_amount(self, user_id, status_type):
         """Get delivered orders for a specific user"""
         num = 0
+        db_query = ""
         if status_type == 'delivered':
-            query = "SELECT COUNT(*) FROM orders WHERE status='delivered' and sender={}".format(user_id)
+            db_query = "SELECT COUNT(*) FROM orders WHERE status='delivered' and sender={}".format(
+                user_id)
+        else:
+            db_query = "SELECT COUNT(*) FROM orders WHERE status='in-transit' and sender={}".format(
+                user_id)
 
-            curr = self.order_db.cursor()
-            curr.execute(query)
-            data = curr.fetchone()
+        curr = self.order_db.cursor()
+        curr.execute(db_query)
+        data = curr.fetchone()
 
-            num = data[0]
+        num = data[0]
 
         return num
-
-    def get_orders_in_transit(self, user_id):
-        """Get orders in transit by a specific user"""
-        user_orders = [order for order in self.order_db if (
-            order['sender'] == user_id and order['status'] == 'in transit')]
-        return len(user_orders)
 
 
 class ValidateInputs():
@@ -181,6 +180,8 @@ class ValidateInputs():
             message = "location  missing"
         elif not self.user_input['gender']:
             message = "gender missing"
+        elif not self.user_input['type']:
+            message = "type missing"
         elif not self.user_input['password']:
             message = "password missing"
         else:

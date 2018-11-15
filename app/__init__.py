@@ -11,7 +11,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_pyfile('config.py')
     jwt = JWTManager(app)
-    #destroy_tables()
+    destroy_tables()
     create_tables()
     app.register_blueprint(VERSION1)
     return app

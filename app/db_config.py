@@ -55,6 +55,7 @@ def tables():
         gender CHARACTER VARYING(10) NOT NULL,
         email CHARACTER VARYING(50) NOT NULL,
         location CHARACTER VARYING(50) NOT NULL,
+        type CHARACTER VARYING(10) NOT NULL,
         password TEXT NOT NULL);"""
 
     query = [tb_orders, tb_users]
