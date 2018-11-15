@@ -88,6 +88,8 @@ class OrdersModel():
             update_column = "status='{}'".format(col_val)
         elif update_col == 'location':
             update_column = "current_location='{}'".format(col_val)
+        else:
+            update_column = "destination='{}'".format(col_val)
 
         if_exist = self.get_order(order_id)
 
@@ -100,49 +102,6 @@ class OrdersModel():
             curr.execute(query)
 
             result = self.get_order(order_id)
-
-        return result
-
-    def change_delivery(self, order_id, delivery_location):
-        """change delivery location"""
-        result = {}
-        if_exist = self.get_order(order_id)
-
-        if "message" in if_exist:
-            result = {"message": "order unknown"}
-        else:
-            query = "UPDATE orders SET status='{}' WHERE order_no={}".format(
-                delivery_location, order_id)
-            curr = self.order_db.cursor()
-            curr.execute(query)
-
-            result = self.get_order(order_id)
-
-        return result
-
-    def change_location(self, order_id, current_location):
-        """change current location"""
-        result = {"message": "order unknown"}
-
-        for order in self.order_db:
-            if order['order no'] == order_id:
-                order['current location'] = current_location
-                result = {"message": "order " + order_id +
-                                     " Current location changed!", "Order " + order_id: order}
-                break
-
-        return result
-
-    def change_status(self, order_id, status):
-        """change delivery order status"""
-        result = {"message": "order unknown"}
-
-        for order in self.order_db:
-            if order['order no'] == order_id:
-                order['status'] = status
-                result = {"message": "order " + order_id +
-                                     " Status changed!", "Order " + order_id: order}
-                break
 
         return result
 

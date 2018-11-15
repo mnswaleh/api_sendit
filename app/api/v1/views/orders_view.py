@@ -83,8 +83,8 @@ class DeliveryOrderDeliveryUpdate(Resource):
         if data_validation != "ok":
             return make_response(jsonify({"Error": data_validation}), 400)
         else:
-            result = orders_db.change_delivery(
-                parcelId, data['delivery location'])
+            result = orders_db.update_order(
+                parcelId, 'delivery', data['delivery location'])
 
             return make_response(jsonify(result))
 
