@@ -1,15 +1,14 @@
 """Orders Models"""
 from datetime import date
 from .users_model import UsersModel
-orders = []
+from app.db_config import init_db
 
 
 class OrdersModel():
     """Create Orders Model"""
 
     def __init__(self):
-        self.users_db = UsersModel()
-        self.order_db = orders
+        self.order_db = init_db()
 
     def create_order(self, data):
         """Create order and append it to orders"""
@@ -30,7 +29,17 @@ class OrdersModel():
             "sender": data['sender']
         }
 
-        self.order_db.append(order)
+        query = """INSERT INTO orders(
+                                     pickup, destination, current_location, weight, price, sender, status, created
+                                     ) 
+                                VALUES(
+                                        %(pick_up_location)s, %(delivery_location)s, %(current_location)s, %(weight)s, %(price)s, %(sender)s, %(status)s, %(date_created)s
+                                        )"""
+
+        curr = self.order_db.cursor()
+        curr.execute(query, order)
+
+        self.order_db.commit()
 
         return order
 
@@ -41,7 +50,7 @@ class OrdersModel():
     def get_order(self, order_id):
         """Get a specific order from database"""
         result = {"message": "order unknown"}
-
+    
         for order in self.order_db:
             if order['order no'] == order_id:
                 result = order
