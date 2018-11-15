@@ -17,12 +17,10 @@ class OrdersModel():
         created = today.strftime("%d/%m/%Y")
 
         order = {
-            "order id": len(self.order_db) + 1,
-            "order no": data['order no'],
-            "date created": created,
-            "pick up location": data['pick up location'],
-            "delivery location": data['delivery location'],
-            "current location": data['pick up location'],
+            "date_created": created,
+            "pick_up_location": data['pick up location'],
+            "delivery_location": data['delivery location'],
+            "current_location": data['pick up location'],
             "weight": data['weight'],
             "price": data['price'],
             "status": "pending",
@@ -67,7 +65,7 @@ class OrdersModel():
     def get_order(self, order_id):
         """Get a specific order from database"""
         result = {}
-        query = "SELECT * FROM orders"
+        query = "SELECT * FROM orders WHERE order_no={}".format(order_id)
 
         curr = self.order_db.cursor()
         curr.execute(query)
@@ -84,14 +82,17 @@ class OrdersModel():
 
     def cancel_order(self, order_id):
         """Cancel delivery order"""
-        result = {"message": "order unknown"}
+        result = {}
+        if_exist = self.get_order(order_id)
+    
+        if "message" in if_exist:
+            result = {"message": "order unknown"}
+        else:
+            query = "UPDATE orders SET status='canceled' WHERE order_no={}".format(order_id)
+            curr = self.order_db.cursor()
+            curr.execute(query)
 
-        for order in self.order_db:
-            if order['order no'] == order_id:
-                order['status'] = "canceled"
-                result = {"message": "order " + order_id +
-                                     " is canceled!", "Order " + order_id: order}
-                break
+            result = self.get_order(order_id)
 
         return result
 
@@ -134,20 +135,20 @@ class OrdersModel():
 
         return result
 
-    def get_user_orders(self, user_id):
-        """Get orders created by specific order"""
-        users = self.users_db.get_users()
+    # def get_user_orders(self, user_id):
+    #     """Get orders created by specific order"""
+    #     users = self.users_db.get_users()
 
-        user_orders = []
-        for order in self.order_db:
-            if order['sender'] == user_id:
-                for user in users:
-                    if user['user id'] == order['sender']:
-                        order['sender'] = user['username']
-                        break
-                user_orders.append(order)
+    #     user_orders = []
+    #     for order in self.order_db:
+    #         if order['sender'] == user_id:
+    #             for user in users:
+    #                 if user['user id'] == order['sender']:
+    #                     order['sender'] = user['username']
+    #                     break
+    #             user_orders.append(order)
 
-        return user_orders
+    #     return user_orders
 
     def get_delivered_orders(self, user_id):
         """Get delivered orders for a specific user"""
@@ -223,9 +224,7 @@ class ValidateInputs():
 
     def create_order_inputs(self):
         """confirm inputs for creating order"""
-        if not self.user_input['order no']:
-            message = "order no missing"
-        elif not self.user_input['pick up location']:
+        if not self.user_input['pick up location']:
             message = "pickup location missing"
         elif not self.user_input['delivery location']:
             message = "delivery locationv missing"

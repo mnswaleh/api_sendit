@@ -20,8 +20,6 @@ class DeliveryOrders(Resource):
     def post(self):
         """Create delivery order"""
         result = reqparse.RequestParser()
-        result.add_argument(
-            'order no', help="order no is required", required=True)
         result.add_argument('pick up location', type=str,
                             help="pick up location' is required to be a string", required=True)
         result.add_argument('delivery location', type=str,
