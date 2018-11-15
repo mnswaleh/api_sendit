@@ -45,7 +45,7 @@ def tables():
         current_location CHARACTER VARYING(50) NOT NULL,
         sender INTEGER NOT NULL,
         status CHARACTER VARYING(10) NOT NULL,
-        created DATE NOT NULL);"""
+        created DATE NOT NULL DEFAULT CURRENT_DATE);"""
 
     tb_users = """CREATE TABLE IF NOT EXISTS users(
         user_id SERIAL PRIMARY KEY NOT NULL,

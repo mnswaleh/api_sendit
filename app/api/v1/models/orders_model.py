@@ -1,5 +1,4 @@
 """Orders Models"""
-from datetime import date
 from .users_model import UsersModel
 from app.db_config import init_db
 
@@ -12,12 +11,7 @@ class OrdersModel():
 
     def create_order(self, data):
         """Create order and append it to orders"""
-        today = date.today()
-
-        created = today.strftime("%d/%m/%Y")
-
         order = {
-            "date_created": created,
             "pick_up_location": data['pick up location'],
             "delivery_location": data['delivery location'],
             "current_location": data['pick up location'],
@@ -28,10 +22,10 @@ class OrdersModel():
         }
 
         query = """INSERT INTO orders(
-                                     pickup, destination, current_location, weight, price, sender, status, created
+                                     pickup, destination, current_location, weight, price, sender, status
                                      ) 
                                 VALUES(
-                                        %(pick_up_location)s, %(delivery_location)s, %(current_location)s, %(weight)s, %(price)s, %(sender)s, %(status)s, %(date_created)s
+                                        %(pick_up_location)s, %(delivery_location)s, %(current_location)s, %(weight)s, %(price)s, %(sender)s, %(status)s
                                         )"""
 
         curr = self.order_db.cursor()
@@ -100,6 +94,7 @@ class OrdersModel():
                 update_column, order_id)
             curr = self.order_db.cursor()
             curr.execute(query)
+            self.order_db.commit()
 
             result = self.get_order(order_id)
 
@@ -125,12 +120,19 @@ class OrdersModel():
 
         return response
 
-    def get_delivered_orders(self, user_id):
+    def get_order_amount(self, user_id, status_type):
         """Get delivered orders for a specific user"""
-        user_orders = [order for order in self.order_db if (
-            order['sender'] == user_id and order['status'] == 'delivered')]
+        num = 0
+        if status_type == 'delivered':
+            query = "SELECT COUNT(*) FROM orders WHERE status='delivered' and sender={}".format(user_id)
 
-        return len(user_orders)
+            curr = self.order_db.cursor()
+            curr.execute(query)
+            data = curr.fetchone()
+
+            num = data[0]
+
+        return num
 
     def get_orders_in_transit(self, user_id):
         """Get orders in transit by a specific user"""

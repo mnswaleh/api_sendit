@@ -110,7 +110,6 @@ on terminal: type
 2. send post request with delivery order eg,
 ```
     {
-	"order no": "367857",
 	"pick up location": "nyahururu",
 	"delivery location": "kitale",
 	"weight": 2,

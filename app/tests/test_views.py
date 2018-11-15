@@ -22,7 +22,6 @@ class TestDeliveryOrders(unittest.TestCase):
         }
 
         self.order_data = {
-            "order no": "588356",
             "pick up location": "nanyuki",
             "delivery location": "nairobi",
             "weight": 2,
