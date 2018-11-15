@@ -45,7 +45,24 @@ class OrdersModel():
 
     def get_orders(self):
         """Get orders in database"""
-        return self.order_db
+        query = "SELECT * FROM orders"
+
+        curr = self.order_db.cursor()
+        curr.execute(query)
+
+        data = curr.fetchall()
+
+        resp = []
+
+        for row in data:
+            item_resp = {}
+            for i, key in enumerate(curr.description):
+                item_resp[key[0]] = row[i]
+                
+            resp.append(item_resp)
+
+
+        return resp
 
     def get_order(self, order_id):
         """Get a specific order from database"""
