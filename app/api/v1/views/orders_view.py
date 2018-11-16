@@ -2,6 +2,7 @@
 
 from flask import make_response, jsonify, request
 from flask_restful import Resource, reqparse
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.v1.models.orders_model import OrdersModel, ValidateInputs
 
 
@@ -10,7 +11,7 @@ class DeliveryOrders(Resource):
 
     def __init__(self):
         self.orders_db = OrdersModel()
-
+    
     def get(self):
         """Fetch all orders"""
         result = self.orders_db.get_orders()
