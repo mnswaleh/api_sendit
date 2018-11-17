@@ -14,7 +14,8 @@ def create_app(obj_config):
     jwt = JWTManager(app)
     flask_bcrypt = Bcrypt(app)
     with app.app_context():
-        #destroy_tables()
+        if obj_config == "app.config.TestingConfig":
+            destroy_tables()
         create_tables()
     app.register_blueprint(VERSION1)
     return app

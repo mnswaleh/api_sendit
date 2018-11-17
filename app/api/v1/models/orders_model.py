@@ -1,13 +1,14 @@
 """Orders Models"""
 from .users_model import UsersModel
 from app.db_config import init_db
-
+from app.api.v1.models.users_model import UsersModel
 
 class OrdersModel():
     """Create Orders Model"""
 
     def __init__(self):
         self.order_db = init_db()
+        self.user_db = UsersModel()
 
     def create_order(self, data):
         """Create order and append it to orders"""
@@ -146,6 +147,7 @@ class ValidateInputs():
     def __init__(self, fetch_data, data_for):
         self.user_input = fetch_data
         self.data_for = data_for
+        self.user_db = UsersModel()
 
     def confirm_input(self):
         """Confirm if there is user input"""
@@ -185,7 +187,7 @@ class ValidateInputs():
         elif not self.user_input['password']:
             message = "password missing"
         else:
-            message = "ok"
+            message = self.user_db.get_username(self.user_input['username'])
 
         return message
 

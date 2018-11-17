@@ -2,6 +2,7 @@
 
 from flask import make_response, jsonify
 from flask_restful import Resource, reqparse
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.v1.models.users_model import UsersModel
 from app.api.v1.models.orders_model import OrdersModel, ValidateInputs
 
@@ -16,6 +17,17 @@ class Users(Resource):
     def post(self):
         """Create User"""
         result = {}
+        data = self.pars_data()
+        inputs_validate = ValidateInputs(data, 'create_user')
+        data_validation = inputs_validate.confirm_input()
+        if data_validation != "ok":
+            result = make_response(jsonify({"Error": data_validation}), 400)
+        else:
+            res = self.orders_db.create_user(data)
+            result = make_response(jsonify(res), 201)
+        return result
+
+    def pars_data(self):
         self.result.add_argument(
             'username', type=str, help="username is required to be a string", required=True, location='json')
         self.result.add_argument(
@@ -32,15 +44,9 @@ class Users(Resource):
             'type', type=str, help="type is required to be a string", required=True, location='json')
         self.result.add_argument(
             'password', type=str, help="password is required to be a string", required=True, location='json')
-        data = self.result.parse_args()
-        inputs_validate = ValidateInputs(data, 'create_user')
-        data_validation = inputs_validate.confirm_input()
-        if data_validation != "ok":
-            result = make_response(jsonify({"Error": data_validation}), 400)
-        else:
-            res = self.orders_db.create_user(data)
-            result = make_response(jsonify(res), 201)
-        return result
+
+        return self.result.parse_args()
+
 
 
 class UserSignin(Resource):
@@ -76,6 +82,7 @@ class UserOrders(Resource):
         self.users_db = UsersModel()
         self.orders_db = OrdersModel()
 
+    @jwt_required
     def get(self, userId):
         """ Fetch all delivery orders created by a specific user"""
         result = self.orders_db.get_user_orders(userId)
@@ -90,6 +97,7 @@ class UserDeliveredOrders(Resource):
         self.users_db = UsersModel()
         self.orders_db = OrdersModel()
 
+    @jwt_required
     def get(self, userId):
         """Fetch delivery orders delivered for a specific user"""
         result = self.orders_db.get_order_amount(userId, 'delivered')
@@ -104,6 +112,7 @@ class UserOrdersInTransit(Resource):
         self.users_db = UsersModel()
         self.orders_db = OrdersModel()
 
+    @jwt_required
     def get(self, userId):
         """Fetch delivery orders in transit for a specific user"""
         result = self.orders_db.get_order_amount(userId, 'in-transit')

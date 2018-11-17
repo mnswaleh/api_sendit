@@ -51,6 +51,23 @@ class UsersModel():
 
         return result
 
+    def get_username(self, user_name):
+        """Get a specific user from the database"""
+        result = {}
+        query = "SELECT * FROM users WHERE username='{}'".format(user_name)
+
+        curr = self.user_db.cursor()
+        curr.execute(query)
+
+        data = curr.fetchone()
+
+        if data:
+            result = "username already exists"
+        else:
+            result = "ok"
+
+        return result
+
     def user_login(self, username, password):
         """User login method"""
         user_data = {}

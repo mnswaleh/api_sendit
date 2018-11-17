@@ -20,6 +20,7 @@ class DeliveryOrders(Resource):
 
         return make_response(jsonify({"Title": "Delivery orders", "Delivery orders list": result}))
 
+    @jwt_required
     def post(self):
         """Create delivery order"""
         result = reqparse.RequestParser()
@@ -51,6 +52,7 @@ class DeliveryOrders(Resource):
 class DeliveryOrder(Resource):
     """Create Delivery Order Object to fetch a specific delivery order or update current location"""
 
+    @jwt_required
     def get(self, parcelId):
         """Fetch a specific delivery order"""
         orders_db = OrdersModel()
@@ -65,6 +67,7 @@ class DeliveryOrderUpdate(Resource):
     def __init__(self):
         self.orders_db = OrdersModel()
 
+    @jwt_required
     def put(self, parcelId):
         """Cancel a delivery order"""
         result = self.orders_db.update_order(parcelId, 'status', 'canceled')
@@ -74,6 +77,7 @@ class DeliveryOrderUpdate(Resource):
 
 class DeliveryOrderDeliveryUpdate(Resource):
     """Create Delivery Orders Object to update delivery order details"""
+    @jwt_required
     def put(self, parcelId):
         """Change delivery location"""
         orders_db = OrdersModel()
@@ -93,6 +97,7 @@ class DeliveryOrderDeliveryUpdate(Resource):
 
 class DeliveryOrderLocation(Resource):
     """Create Delivery Orders Object to update delivery order current location"""
+    @jwt_required
     def put(self, parcelId):
         """Change current location"""
         orders_db = OrdersModel()
@@ -112,6 +117,7 @@ class DeliveryOrderLocation(Resource):
 
 class DeliveryOrderStatus(Resource):
     """Create Delivery Orders Object to update delivery order status"""
+    @jwt_required
     def put(self, parcelId):
         """Change order status"""
         orders_db = OrdersModel()
