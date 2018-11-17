@@ -1,19 +1,18 @@
 import os
+from flask import current_app
 import psycopg2
 
-url = "host='localhost' dbname='apisendit' port='5432' user='postgres' password='92203243'"
-
 def connection(url):
-    con = psycopg2.connect(url)
+    con = psycopg2.connect(current_app.config['DATABASE_URL'])
     return con
 
 def init_db():
-    con = connection(url)
+    con = connection(current_app.config['DATABASE_URL'])
     return con
 
 def create_tables():
     tables_q = tables()
-    conn = connection(url)
+    conn = connection(current_app.config['DATABASE_URL'])
     curl = conn.cursor()
 
     for table in tables_q:
@@ -27,7 +26,7 @@ def destroy_tables():
 
     query = [orders_tbl, users_tbl]
 
-    conn = connection(url)
+    conn = connection(current_app.config['DATABASE_URL'])
     curl = conn.cursor()
 
     for table in query:

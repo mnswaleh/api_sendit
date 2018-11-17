@@ -9,8 +9,8 @@ class TestDeliveryOrders(unittest.TestCase):
 
     def setUp(self):
         """Set up test"""
-        create_app().testing = True
-        self.app = create_app().test_client()
+        create_app('app.config.TestingConfig').testing = True
+        self.app = create_app('app.config.TestingConfig').test_client()
         self.user_data = {
             "username": "tom",
             "first_name": "thomas",

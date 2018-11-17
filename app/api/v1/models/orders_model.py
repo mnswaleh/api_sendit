@@ -35,7 +35,7 @@ class OrdersModel():
 
         return order
 
-    def get_orders(self):
+    def get_orders(self, user_auth):
         """Get orders in database"""
         query = "SELECT * FROM orders"
 

@@ -29,7 +29,9 @@ class UsersModel():
 
         self.user_db.commit()
 
-        return self.user_login(user['username'], user['password'])
+        result = self.user_login(data['username'], data['password'])
+
+        return result
 
     def get_user(self, user_id):
         """Get a specific user from the database"""

@@ -11,10 +11,12 @@ class DeliveryOrders(Resource):
 
     def __init__(self):
         self.orders_db = OrdersModel()
-    
+
+    @jwt_required
     def get(self):
         """Fetch all orders"""
-        result = self.orders_db.get_orders()
+        user_auth = get_jwt_identity()
+        result = self.orders_db.get_orders(user_auth)
 
         return make_response(jsonify({"Title": "Delivery orders", "Delivery orders list": result}))
 
