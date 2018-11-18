@@ -24,12 +24,7 @@ class OrdersModel(object):
             "sender": data['sender']
         }
 
-        query = """INSERT INTO orders(
-                                     pickup, destination, current_location, weight, price, sender, status
-                                     ) 
-                                VALUES(
-                                        %(pick_up_location)s, %(delivery_location)s, %(current_location)s, %(weight)s, %(price)s, %(sender)s, %(status)s
-                                        )"""
+        query = """INSERT INTO orders(pickup, destination, current_location, weight, price, sender, status) VALUES(%(pick_up_location)s, %(delivery_location)s, %(current_location)s, %(weight)s, %(price)s, %(sender)s, %(status)s)"""
 
         curr = self.order_db.cursor()
         curr.execute(query, order)
@@ -61,26 +56,27 @@ class OrdersModel(object):
 
     def get_order(self, order_id, user_auth=0):
         """Get a specific order from database"""
-        authenticated_user = True
         result = {}
-        if user_auth != 0 and self.user_auth.auth_user(user_auth, order_id):
-            authenticated_user = False
+        query = "SELECT * FROM orders WHERE order_no={}".format(order_id)
 
-        if authenticated_user:
-            query = "SELECT * FROM orders WHERE order_no={}".format(order_id)
+        curr = self.order_db.cursor()
+        curr.execute(query)
 
-            curr = self.order_db.cursor()
-            curr.execute(query)
+        data = curr.fetchone()
 
-            data = curr.fetchone()
-
-            if not data:
-                result = {"message": "order unknown"}
+        if not data:
+            result = {"message": "order unknown"}
+        elif user_auth != 0:
+            for i, key in enumerate(curr.description):
+                result[key[0]] = data[i]
+            user_details = self.user_db.get_user(user_auth)
+            if result['sender'] == user_auth or user_details['type'] == 'admin':
+                pass
             else:
-                for i, key in enumerate(curr.description):
-                    result[key[0]] = data[i]
+                result = {"ERROR": "Forbidden access!!"}
         else:
-            result = {"ERROR": "Forbidden access!!"}
+            for i, key in enumerate(curr.description):
+                result[key[0]] = data[i]
 
         return result
 

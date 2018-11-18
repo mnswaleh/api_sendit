@@ -62,9 +62,18 @@ class DeliveryOrder(Resource):
     def get(self, parcelId):
         """Fetch a specific delivery order"""
         orders_db = OrdersModel()
-        result = orders_db.get_order(parcelId)
+        response = {}
+        user_auth = get_jwt_identity()
+        result = orders_db.get_order(parcelId, user_auth)
 
-        return make_response(jsonify(result))
+        if "message" in result:
+            response = make_response(jsonify(result), 404)
+        elif "ERROR" in result:
+            response = make_response(jsonify(result), 403)
+        else:
+            response = make_response(jsonify(result))
+
+        return response
 
 
 class DeliveryOrderUpdate(Resource):
