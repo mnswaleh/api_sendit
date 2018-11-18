@@ -1,17 +1,19 @@
 """Users Module"""
 from flask_jwt_extended import create_access_token
-from app.db_config import init_db
 import flask_bcrypt
+from app.db_config import init_db
 
 
 class UsersModel():
     """Create Users Model"""
+
     def __init__(self):
         self.user_db = init_db()
 
     def create_user(self, data):
         """Create user and append to users db"""
-        user_pass = flask_bcrypt.generate_password_hash(data['password']).decode('utf-8')
+        user_pass = flask_bcrypt.generate_password_hash(
+            data['password']).decode('utf-8')
         user = {
             "username": data['username'],
             "first_name": data['first_name'],
@@ -73,7 +75,6 @@ class UsersModel():
         user_data = {}
         result = {"ERROR": "invalid user name or password"}
         access_token = "Access Denied!"
-        
         query = "SELECT * FROM users WHERE username='{}'".format(
             username)
 
@@ -89,12 +90,14 @@ class UsersModel():
             if flask_bcrypt.check_password_hash(user_data['password'], password):
                 result = user_data
                 access_token = create_access_token(
-                identity=result['user_id'])
+                    identity=result['user_id'])
 
         return {"access:": access_token, "user:": result}
 
-class Authenticate_user():
+
+class AuthenticateUser():
     """Class for user authentication"""
+
     def __init__(self):
         self.user_db = UsersModel()
 
@@ -109,6 +112,8 @@ class Authenticate_user():
         """Authenticate user updating order"""
         if user_id == sender_id:
             return True
+        else:
+            return False
 
     def auth_admin(self, user_id):
         """Authenticate admin updating order"""
@@ -116,3 +121,5 @@ class Authenticate_user():
 
         if user_details['type'] == "admin":
             return True
+        else:
+            return False

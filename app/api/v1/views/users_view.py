@@ -4,7 +4,7 @@ from flask import make_response, jsonify
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.v1.models.users_model import UsersModel
-from app.api.v1.models.orders_model import OrdersModel, ValidateInputs, Authenticate_user
+from app.api.v1.models.orders_model import OrdersModel, ValidateInputs
 
 
 class Users(Resource):
@@ -28,6 +28,7 @@ class Users(Resource):
         return result
 
     def pars_data(self):
+        """Parse user data"""
         self.result.add_argument(
             'username', type=str, help="username is required to be a string", required=True, location='json')
         self.result.add_argument(
@@ -46,7 +47,6 @@ class Users(Resource):
             'password', type=str, help="password is required to be a string", required=True, location='json')
 
         return self.result.parse_args()
-
 
 
 class UserSignin(Resource):
@@ -86,8 +86,9 @@ class UserOrders(Resource):
         if result and "ERROR" in result[0]:
             response = make_response(jsonify(result[0]), 403)
         else:
-            response = make_response(jsonify({"Title": "Delivery orders by user " + str(userId), "Delivery orders list": result}))
-        
+            response = make_response(jsonify(
+                {"Title": "Delivery orders by user " + str(userId), "Delivery orders list": result}))
+
         return response
 
 
@@ -97,9 +98,17 @@ class UserDeliveredOrders(Resource):
     def get(self, userId):
         """Fetch delivery orders delivered for a specific user"""
         orders_db = OrdersModel()
-        result = orders_db.get_order_amount(userId, 'delivered')
+        response = {}
+        user_auth = get_jwt_identity()
+        result = orders_db.get_order_amount(userId, 'delivered', user_auth)
+        if result == "Forbid":
+            response = make_response(
+                jsonify({"ERROR": "Forbidden Access"}), 403)
+        else:
+            response = make_response(
+                jsonify({"Delivered orders for user " + str(userId): result}))
 
-        return make_response(jsonify({"Delivered orders for user" + str(userId): result}))
+        return response
 
 
 class UserOrdersInTransit(Resource):
@@ -109,6 +118,7 @@ class UserOrdersInTransit(Resource):
     def get(self, userId):
         """Fetch delivery orders in transit for a specific user"""
         orders_db = OrdersModel()
-        result = orders_db.get_order_amount(userId, 'in-transit')
+        user_auth = get_jwt_identity()
+        result = orders_db.get_order_amount(userId, 'in-transit', user_auth)
 
-        return make_response(jsonify({"Orders in-transit for user" + str(userId): result}))
+        return make_response(jsonify({"Orders in-transit for user " + str(userId): result}))

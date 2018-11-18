@@ -31,7 +31,6 @@ class DeliveryOrders(Resource):
     def post(self):
         """Create delivery order"""
         user_auth = get_jwt_identity()
-        
         data = self.pars_data()
         data = request.get_json(force=True)
         inputs_validate = ValidateInputs(data, 'create_order')
@@ -50,10 +49,11 @@ class DeliveryOrders(Resource):
         return response
 
     def pars_data(self):
+        """Parse user data"""
         self.result.add_argument('pick up location', type=str,
-                            help="pick up location' is required to be a string", required=True)
+                                 help="pick up location' is required to be a string", required=True)
         self.result.add_argument('delivery location', type=str,
-                            help="delivery location' is required to be a string", required=True)
+                                 help="delivery location' is required to be a string", required=True)
         self.result.add_argument(
             'weight', type=int, help="weight is required to be an integer", required=True)
         self.result.add_argument(
@@ -94,7 +94,8 @@ class DeliveryOrderUpdate(Resource):
         """Cancel a delivery order"""
         user_auth = get_jwt_identity()
         response = {}
-        result = self.orders_db.update_order(parcelId, 'cancel', 'canceled', user_auth)
+        result = self.orders_db.update_order(
+            parcelId, 'cancel', 'canceled', user_auth)
 
         if "ERROR" in result:
             response = make_response(jsonify(result), 403)
@@ -160,7 +161,6 @@ class DeliveryOrderLocation(Resource):
                 response = make_response(jsonify(result), 404)
             else:
                 response = make_response(jsonify(result))
-        
         return response
 
 

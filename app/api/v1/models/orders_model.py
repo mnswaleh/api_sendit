@@ -1,16 +1,16 @@
 """Orders Models"""
 from app.db_config import init_db
 from app.api.v1.models.users_model import UsersModel
-from app.api.v1.models.users_model import Authenticate_user
+from app.api.v1.models.users_model import AuthenticateUser
 
 
-class OrdersModel(object):
+class OrdersModel():
     """Create Orders Model"""
 
     def __init__(self):
         self.order_db = init_db()
         self.user_db = UsersModel()
-        self.user_auth = Authenticate_user()
+        self.user_auth = AuthenticateUser()
 
     def create_order(self, data, user_auth):
         """Create order and append it to orders"""
@@ -137,24 +137,27 @@ class OrdersModel(object):
 
         return response
 
-    def get_order_amount(self, user_id, status_type):
+    def get_order_amount(self, user_id, status_type, auth_user):
         """Get delivered orders for a specific user"""
-        num = 0
-        db_query = ""
-        if status_type == 'delivered':
-            db_query = "SELECT COUNT(*) FROM orders WHERE status='delivered' and sender={}".format(
-                user_id)
+        user_details = self.user_db.get_user(auth_user)
+        if user_id == auth_user or user_details['type'] == 'admin':
+            db_query = ""
+            if status_type == 'delivered':
+                db_query = "SELECT COUNT(*) FROM orders WHERE status='delivered' and sender={}".format(
+                    user_id)
+            else:
+                db_query = "SELECT COUNT(*) FROM orders WHERE status='in-transit' and sender={}".format(
+                    user_id)
+
+            curr = self.order_db.cursor()
+            curr.execute(db_query)
+            data = curr.fetchone()
+
+            num = data[0]
+
+            return num
         else:
-            db_query = "SELECT COUNT(*) FROM orders WHERE status='in-transit' and sender={}".format(
-                user_id)
-
-        curr = self.order_db.cursor()
-        curr.execute(db_query)
-        data = curr.fetchone()
-
-        num = data[0]
-
-        return num
+            return "Forbid"
 
 
 class ValidateInputs():

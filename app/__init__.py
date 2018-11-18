@@ -3,8 +3,8 @@
 from flask import Flask, Blueprint
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
-from .db_config import create_tables, destroy_tables
 from app.api.v1 import VERSION1
+from .db_config import create_tables, destroy_tables
 
 
 def create_app(obj_config):
