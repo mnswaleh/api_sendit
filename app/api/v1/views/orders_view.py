@@ -98,19 +98,25 @@ class DeliveryOrderDeliveryUpdate(Resource):
         user_auth = get_jwt_identity()
         orders_db = OrdersModel()
         result = reqparse.RequestParser()
-
+        response = {}
         result.add_argument('delivery location', type=str,
                             help="delivery location is required", required=True)
         data = result.parse_args()
         inputs_validate = ValidateInputs(data, 'change_delivery')
         data_validation = inputs_validate.confirm_input()
         if data_validation != "ok":
-            return make_response(jsonify({"Error": data_validation}), 400)
+            response = make_response(jsonify({"Error": data_validation}), 400)
         else:
             result = orders_db.update_order(
                 parcelId, 'delivery', data['delivery location'], user_auth)
+            if "ERROR" in result:
+                response = make_response(jsonify(result), 403)
+            elif "message" in result:
+                response = make_response(jsonify(result), 404)
+            else:
+                response = make_response(jsonify(result))
 
-            return make_response(jsonify(result))
+        return response
 
 
 class DeliveryOrderLocation(Resource):
@@ -121,18 +127,25 @@ class DeliveryOrderLocation(Resource):
         user_auth = get_jwt_identity()
         orders_db = OrdersModel()
         result = reqparse.RequestParser()
+        response = {}
         result.add_argument('current location', type=str,
                             help="current location is required", required=True)
         data = result.parse_args()
         inputs_validate = ValidateInputs(data, 'change_location')
         data_validation = inputs_validate.confirm_input()
         if data_validation != "ok":
-            return make_response(jsonify({"Error": data_validation}), 400)
+            response = make_response(jsonify({"Error": data_validation}), 400)
         else:
             result = orders_db.update_order(
                 parcelId, 'location', data['current location'], user_auth)
-
-            return make_response(jsonify(result))
+            if "ERROR" in result:
+                response = make_response(jsonify(result), 403)
+            elif "message" in result:
+                response = make_response(jsonify(result), 404)
+            else:
+                response = make_response(jsonify(result))
+        
+        return response
 
 
 class DeliveryOrderStatus(Resource):
@@ -143,15 +156,22 @@ class DeliveryOrderStatus(Resource):
         user_auth = get_jwt_identity()
         orders_db = OrdersModel()
         result = reqparse.RequestParser()
+        response = {}
         result.add_argument(
             'status', type=str, help="status' is required to be a string", required=True)
         data = result.parse_args()
         inputs_validate = ValidateInputs(data, 'update_status')
         data_validation = inputs_validate.confirm_input()
         if data_validation != "ok":
-            return make_response(jsonify({"Error": data_validation}), 400)
+            response = make_response(jsonify({"Error": data_validation}), 400)
         else:
             result = orders_db.update_order(
                 parcelId, 'status', data['status'], user_auth)
+            if "ERROR" in result:
+                response = make_response(jsonify(result), 403)
+            elif "message" in result:
+                response = make_response(jsonify(result), 404)
+            else:
+                response = make_response(jsonify(result))
 
-            return make_response(jsonify(result))
+        return response

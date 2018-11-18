@@ -85,7 +85,7 @@ class OrdersModel():
         if self.user_auth.auth_change(user_id, update_col, order_id):
             if update_col == 'status':
                 update_column = "status='{}'".format(col_val)
-            if update_col == 'cancel':
+            elif update_col == 'cancel':
                 update_column = "status='{}'".format(col_val)
             elif update_col == 'location':
                 update_column = "current_location='{}'".format(col_val)

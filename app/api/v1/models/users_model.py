@@ -104,9 +104,8 @@ class Authenticate_user():
             return self.auth_user(user_id, parcel_id)
 
     def auth_user(self, user_id, parcel_id):
-        user_details = self.user_db.get_user(user_id)
 
-        if user_details['user_id'] == parcel_id:
+        if user_id == parcel_id:
             return True
 
     def auth_admin(self, user_id):
