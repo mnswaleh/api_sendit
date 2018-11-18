@@ -1,3 +1,0 @@
-test:
-  adapter: psycopg2
-  database: apisendit

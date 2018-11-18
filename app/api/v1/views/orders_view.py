@@ -17,8 +17,13 @@ class DeliveryOrders(Resource):
         """Fetch all orders"""
         user_auth = get_jwt_identity()
         result = self.orders_db.get_orders(user_auth)
+        response = {}
+        if result and "ERROR" in result[0]:
+            response = make_response(jsonify(result[0]), 403)
+        else:
+            response = make_response(jsonify({"Title": "Delivery orders", "Delivery orders list": result}))
 
-        return make_response(jsonify({"Title": "Delivery orders", "Delivery orders list": result}))
+        return response
 
     @jwt_required
     def post(self):

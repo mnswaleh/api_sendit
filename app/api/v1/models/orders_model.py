@@ -38,21 +38,23 @@ class OrdersModel():
 
     def get_orders(self, user_auth):
         """Get orders in database"""
-        query = "SELECT * FROM orders"
-
-        curr = self.order_db.cursor()
-        curr.execute(query)
-
-        data = curr.fetchall()
-
         response = []
+        user_details = self.user_db.get_user(user_auth)
 
-        for row in data:
-            item_resp = {}
-            for i, key in enumerate(curr.description):
-                item_resp[key[0]] = row[i]
+        if user_details['type'] == "admin":
+            query = "SELECT * FROM orders"
+            curr = self.order_db.cursor()
+            curr.execute(query)
+            data = curr.fetchall()
 
-            response.append(item_resp)
+            for row in data:
+                item_resp = {}
+                for i, key in enumerate(curr.description):
+                    item_resp[key[0]] = row[i]
+
+                response.append(item_resp)
+        else:
+            response = [{"ERROR": "Forbidden access!!"}]
 
         return response
 
