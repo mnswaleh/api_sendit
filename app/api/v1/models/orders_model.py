@@ -12,8 +12,9 @@ class OrdersModel(object):
         self.user_db = UsersModel()
         self.user_auth = Authenticate_user()
 
-    def create_order(self, data):
+    def create_order(self, data, user_auth):
         """Create order and append it to orders"""
+        response = {}
         order = {
             "pick_up_location": data['pick up location'],
             "delivery_location": data['delivery location'],
@@ -21,17 +22,21 @@ class OrdersModel(object):
             "weight": data['weight'],
             "price": data['price'],
             "status": "pending",
-            "sender": data['sender']
+            "sender": user_auth
         }
+        user_details = self.user_db.get_user(user_auth)
+        if user_details['type'] == 'user':
+            query = """INSERT INTO orders(pickup, destination, current_location, weight, price, sender, status) VALUES(%(pick_up_location)s, %(delivery_location)s, %(current_location)s, %(weight)s, %(price)s, %(sender)s, %(status)s)"""
 
-        query = """INSERT INTO orders(pickup, destination, current_location, weight, price, sender, status) VALUES(%(pick_up_location)s, %(delivery_location)s, %(current_location)s, %(weight)s, %(price)s, %(sender)s, %(status)s)"""
+            curr = self.order_db.cursor()
+            curr.execute(query, order)
+            self.order_db.commit()
 
-        curr = self.order_db.cursor()
-        curr.execute(query, order)
+            response = order
+        else:
+            response = {"ERROR": "Forbidden access!!"}
 
-        self.order_db.commit()
-
-        return order
+        return response
 
     def get_orders(self, user_auth):
         """Get orders in database"""
@@ -223,8 +228,6 @@ class ValidateInputs():
             message = "weight missing"
         elif not self.user_input['price']:
             message = "price missing"
-        elif not self.user_input['sender']:
-            message = "sender missing"
         else:
             message = "ok"
 

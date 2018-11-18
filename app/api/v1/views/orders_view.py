@@ -11,6 +11,7 @@ class DeliveryOrders(Resource):
 
     def __init__(self):
         self.orders_db = OrdersModel()
+        self.result = reqparse.RequestParser()
 
     @jwt_required
     def get(self):
@@ -29,18 +30,9 @@ class DeliveryOrders(Resource):
     @jwt_required
     def post(self):
         """Create delivery order"""
-        result = reqparse.RequestParser()
-        result.add_argument('pick up location', type=str,
-                            help="pick up location' is required to be a string", required=True)
-        result.add_argument('delivery location', type=str,
-                            help="delivery location' is required to be a string", required=True)
-        result.add_argument(
-            'weight', type=int, help="weight is required to be an integer", required=True)
-        result.add_argument(
-            'price', type=int, help="price is required to be an integer", required=True)
-        result.add_argument(
-            'sender', type=int, help="sender is required to be an integer", required=True)
-        data = result.parse_args()
+        user_auth = get_jwt_identity()
+        
+        data = self.pars_data()
         data = request.get_json(force=True)
         inputs_validate = ValidateInputs(data, 'create_order')
         data_validation = inputs_validate.confirm_input()
@@ -49,10 +41,25 @@ class DeliveryOrders(Resource):
         if data_validation != "ok":
             response = make_response(jsonify({"Error": data_validation}), 400)
         else:
-            result = self.orders_db.create_order(data)
-            response = make_response(jsonify(result), 201)
+            result = self.orders_db.create_order(data, user_auth)
+            if "ERROR" in result:
+                response = make_response(jsonify(result), 403)
+            else:
+                response = make_response(jsonify(result), 201)
 
         return response
+
+    def pars_data(self):
+        self.result.add_argument('pick up location', type=str,
+                            help="pick up location' is required to be a string", required=True)
+        self.result.add_argument('delivery location', type=str,
+                            help="delivery location' is required to be a string", required=True)
+        self.result.add_argument(
+            'weight', type=int, help="weight is required to be an integer", required=True)
+        self.result.add_argument(
+            'price', type=int, help="price is required to be an integer", required=True)
+
+        return self.result.parse_args()
 
 
 class DeliveryOrder(Resource):
