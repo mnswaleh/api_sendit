@@ -1,7 +1,7 @@
 """Orders Models"""
 from .users_model import UsersModel
 from app.db_config import init_db
-from app.api.v1.models.users_model import UsersModel
+from app.api.v1.models.users_model import UsersModel, Authenticate_user
 
 class OrdersModel():
     """Create Orders Model"""
@@ -9,6 +9,7 @@ class OrdersModel():
     def __init__(self):
         self.order_db = init_db()
         self.user_db = UsersModel()
+        self.user_auth = Authenticate_user()
 
     def create_order(self, data):
         """Create order and append it to orders"""
@@ -76,30 +77,35 @@ class OrdersModel():
 
         return result
 
-    def update_order(self, order_id, update_col, col_val):
+    def update_order(self, order_id, update_col, col_val, user_id):
         """Cancel delivery order"""
         result = {}
         update_column = ""
 
-        if update_col == 'status':
-            update_column = "status='{}'".format(col_val)
-        elif update_col == 'location':
-            update_column = "current_location='{}'".format(col_val)
+        if self.user_auth.auth_change(user_id, update_col, order_id):
+            if update_col == 'status':
+                update_column = "status='{}'".format(col_val)
+            if update_col == 'cancel':
+                update_column = "status='{}'".format(col_val)
+            elif update_col == 'location':
+                update_column = "current_location='{}'".format(col_val)
+            else:
+                update_column = "destination='{}'".format(col_val)
+
+            if_exist = self.get_order(order_id)
+
+            if "message" in if_exist:
+                result = {"message": "order unknown"}
+            else:
+                query = "UPDATE orders SET {} WHERE order_no={}".format(
+                    update_column, order_id)
+                curr = self.order_db.cursor()
+                curr.execute(query)
+                self.order_db.commit()
+
+                result = self.get_order(order_id)
         else:
-            update_column = "destination='{}'".format(col_val)
-
-        if_exist = self.get_order(order_id)
-
-        if "message" in if_exist:
-            result = {"message": "order unknown"}
-        else:
-            query = "UPDATE orders SET {} WHERE order_no={}".format(
-                update_column, order_id)
-            curr = self.order_db.cursor()
-            curr.execute(query)
-            self.order_db.commit()
-
-            result = self.get_order(order_id)
+            result = {"ERROR": "Forbidden access"}
 
         return result
 

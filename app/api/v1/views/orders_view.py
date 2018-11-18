@@ -21,7 +21,8 @@ class DeliveryOrders(Resource):
         if result and "ERROR" in result[0]:
             response = make_response(jsonify(result[0]), 403)
         else:
-            response = make_response(jsonify({"Title": "Delivery orders", "Delivery orders list": result}))
+            response = make_response(
+                jsonify({"Title": "Delivery orders", "Delivery orders list": result}))
 
         return response
 
@@ -75,18 +76,29 @@ class DeliveryOrderUpdate(Resource):
     @jwt_required
     def put(self, parcelId):
         """Cancel a delivery order"""
-        result = self.orders_db.update_order(parcelId, 'status', 'canceled')
+        user_auth = get_jwt_identity()
+        response = {}
+        result = self.orders_db.update_order(parcelId, 'cancel', 'canceled', user_auth)
 
-        return make_response(jsonify(result))
+        if "ERROR" in result:
+            response = make_response(jsonify(result), 403)
+        elif "message" in result:
+            response = make_response(jsonify(result), 404)
+        else:
+            response = make_response(jsonify(result))
+
+        return response
 
 
 class DeliveryOrderDeliveryUpdate(Resource):
-    """Create Delivery Orders Object to update delivery order details"""
+    """Create Delivery Orders Object to change delivery location"""
     @jwt_required
     def put(self, parcelId):
         """Change delivery location"""
+        user_auth = get_jwt_identity()
         orders_db = OrdersModel()
         result = reqparse.RequestParser()
+
         result.add_argument('delivery location', type=str,
                             help="delivery location is required", required=True)
         data = result.parse_args()
@@ -96,15 +108,17 @@ class DeliveryOrderDeliveryUpdate(Resource):
             return make_response(jsonify({"Error": data_validation}), 400)
         else:
             result = orders_db.update_order(
-                parcelId, 'delivery', data['delivery location'])
+                parcelId, 'delivery', data['delivery location'], user_auth)
 
             return make_response(jsonify(result))
+
 
 class DeliveryOrderLocation(Resource):
     """Create Delivery Orders Object to update delivery order current location"""
     @jwt_required
     def put(self, parcelId):
         """Change current location"""
+        user_auth = get_jwt_identity()
         orders_db = OrdersModel()
         result = reqparse.RequestParser()
         result.add_argument('current location', type=str,
@@ -116,15 +130,17 @@ class DeliveryOrderLocation(Resource):
             return make_response(jsonify({"Error": data_validation}), 400)
         else:
             result = orders_db.update_order(
-                parcelId, 'location', data['current location'])
+                parcelId, 'location', data['current location'], user_auth)
 
             return make_response(jsonify(result))
+
 
 class DeliveryOrderStatus(Resource):
     """Create Delivery Orders Object to update delivery order status"""
     @jwt_required
     def put(self, parcelId):
         """Change order status"""
+        user_auth = get_jwt_identity()
         orders_db = OrdersModel()
         result = reqparse.RequestParser()
         result.add_argument(
@@ -136,6 +152,6 @@ class DeliveryOrderStatus(Resource):
             return make_response(jsonify({"Error": data_validation}), 400)
         else:
             result = orders_db.update_order(
-                parcelId, 'status', data['status'])
+                parcelId, 'status', data['status'], user_auth)
 
             return make_response(jsonify(result))
