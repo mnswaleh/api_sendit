@@ -18,11 +18,11 @@ class TestDeliveryOrders(unittest.TestCase):
             "email": "email@gmail.com",
             "gender": "male",
             "location": "eldoret",
+            "type": "user",
             "password": "123456"
         }
 
         self.order_data = {
-            "order no": "588356",
             "pick up location": "nanyuki",
             "delivery location": "nairobi",
             "weight": 2,
@@ -47,6 +47,7 @@ class TestDeliveryOrders(unittest.TestCase):
 
     def test_signin_user(self):
         """Test endpoint to signin user"""
+        self.test_create_user()
         user_login = self.user_data
         response = self.app.post(
             '/api/v1/auth/login', data=json.dumps({"username": user_login['username'], "password": user_login['password']}), content_type='application/json')
@@ -65,7 +66,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertIn('pending', str(result))
 
         new_order = self.order_data
-        new_order['order no'] = ""
+        new_order['pick up location'] = ""
 
         response = self.app.post(
             '/api/v1/parcels', data=json.dumps(new_order), content_type='application/json')
@@ -76,21 +77,23 @@ class TestDeliveryOrders(unittest.TestCase):
 
     def test_get_all_orders(self):
         """Test endpoint to fetch all orders"""
+        self.test_create_order()
         response = self.app.get(
             '/api/v1/parcels', content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        self.assertIn('588356', str(result))
+        self.assertIn('order_no', str(result))
 
     def test_get_specific_order(self):
         """Test endpoint to fetch a spoecific order"""
+        self.test_create_order()
         response = self.app.get(
-            '/api/v1/parcels/588356', content_type='application/json')
+            '/api/v1/parcels/1', content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        self.assertIn('588356', str(result))
+        self.assertIn('order_no', str(result))
 
     def test_get_delivery_orders_by_user(self):
         """Test endpoint to fetch delivery orders for a specific user"""
@@ -100,13 +103,13 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        self.assertIn('588356', str(result))
+        self.assertIn('order_no', str(result))
 
     def test_cancel_delivery_order(self):
         """Test endpoint to cancel delivery order"""
         self.test_create_order()
         response = self.app.put(
-            '/api/v1/parcels/588356/cancel', content_type='application/json')
+            '/api/v1/parcels/1/cancel', content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
@@ -114,8 +117,9 @@ class TestDeliveryOrders(unittest.TestCase):
 
     def test_edit_current_location(self):
         """Test endpoint to change current location"""
+        self.test_create_order()
         response = self.app.put(
-            '/api/v1/parcels/588356/presentLocation', data=json.dumps(self.edit_data), content_type='application/json')
+            '/api/v1/parcels/1/presentLocation', data=json.dumps(self.edit_data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
@@ -123,8 +127,9 @@ class TestDeliveryOrders(unittest.TestCase):
 
     def test_edit_status(self):
         """Test endpoint to change status"""
+        self.test_create_order()
         response = self.app.put(
-            '/api/v1/parcels/588356/status', data=json.dumps(self.edit_data), content_type='application/json')
+            '/api/v1/parcels/1/status', data=json.dumps(self.edit_data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
@@ -135,7 +140,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.test_create_order()
 
         response = self.app.put(
-            '/api/v1/parcels/588356/destination', data=json.dumps(self.edit_data), content_type='application/json')
+            '/api/v1/parcels/1/destination', data=json.dumps(self.edit_data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)

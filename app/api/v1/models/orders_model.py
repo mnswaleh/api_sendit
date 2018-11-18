@@ -1,133 +1,143 @@
 """Orders Models"""
-from datetime import date
 from .users_model import UsersModel
-orders = []
+from app.db_config import init_db
 
 
 class OrdersModel():
     """Create Orders Model"""
 
     def __init__(self):
-        self.users_db = UsersModel()
-        self.order_db = orders
+        self.order_db = init_db()
 
     def create_order(self, data):
         """Create order and append it to orders"""
-        today = date.today()
-
-        created = today.strftime("%d/%m/%Y")
-
         order = {
-            "order id": len(self.order_db) + 1,
-            "order no": data['order no'],
-            "date created": created,
-            "pick up location": data['pick up location'],
-            "delivery location": data['delivery location'],
-            "current location": data['pick up location'],
+            "pick_up_location": data['pick up location'],
+            "delivery_location": data['delivery location'],
+            "current_location": data['pick up location'],
             "weight": data['weight'],
             "price": data['price'],
             "status": "pending",
             "sender": data['sender']
         }
 
-        self.order_db.append(order)
+        query = """INSERT INTO orders(
+                                     pickup, destination, current_location, weight, price, sender, status
+                                     ) 
+                                VALUES(
+                                        %(pick_up_location)s, %(delivery_location)s, %(current_location)s, %(weight)s, %(price)s, %(sender)s, %(status)s
+                                        )"""
+
+        curr = self.order_db.cursor()
+        curr.execute(query, order)
+
+        self.order_db.commit()
 
         return order
 
     def get_orders(self):
         """Get orders in database"""
-        return self.order_db
+        query = "SELECT * FROM orders"
+
+        curr = self.order_db.cursor()
+        curr.execute(query)
+
+        data = curr.fetchall()
+
+        response = []
+
+        for row in data:
+            item_resp = {}
+            for i, key in enumerate(curr.description):
+                item_resp[key[0]] = row[i]
+
+            response.append(item_resp)
+
+        return response
 
     def get_order(self, order_id):
         """Get a specific order from database"""
-        result = {"message": "order unknown"}
+        result = {}
+        query = "SELECT * FROM orders WHERE order_no={}".format(order_id)
 
-        for order in self.order_db:
-            if order['order no'] == order_id:
-                result = order
-                break
+        curr = self.order_db.cursor()
+        curr.execute(query)
+
+        data = curr.fetchone()
+
+        if not data:
+            result = {"message": "order unknown"}
+        else:
+            for i, key in enumerate(curr.description):
+                result[key[0]] = data[i]
 
         return result
 
-    def cancel_order(self, order_id):
+    def update_order(self, order_id, update_col, col_val):
         """Cancel delivery order"""
-        result = {"message": "order unknown"}
+        result = {}
+        update_column = ""
 
-        for order in self.order_db:
-            if order['order no'] == order_id:
-                order['status'] = "canceled"
-                result = {"message": "order " + order_id +
-                                     " is canceled!", "Order " + order_id: order}
-                break
+        if update_col == 'status':
+            update_column = "status='{}'".format(col_val)
+        elif update_col == 'location':
+            update_column = "current_location='{}'".format(col_val)
+        else:
+            update_column = "destination='{}'".format(col_val)
 
-        return result
+        if_exist = self.get_order(order_id)
 
-    def change_delivery(self, order_id, delivery_location):
-        """change delivery location"""
-        result = {"message": "order unknown"}
+        if "message" in if_exist:
+            result = {"message": "order unknown"}
+        else:
+            query = "UPDATE orders SET {} WHERE order_no={}".format(
+                update_column, order_id)
+            curr = self.order_db.cursor()
+            curr.execute(query)
+            self.order_db.commit()
 
-        for order in self.order_db:
-            if order['order no'] == order_id:
-                order['delivery location'] = delivery_location
-                result = {"message": "order " + order_id +
-                                     " Delivery location changed!", "Order " + order_id: order}
-                break
-
-        return result
-
-    def change_location(self, order_id, current_location):
-        """change current location"""
-        result = {"message": "order unknown"}
-
-        for order in self.order_db:
-            if order['order no'] == order_id:
-                order['current location'] = current_location
-                result = {"message": "order " + order_id +
-                                     " Current location changed!", "Order " + order_id: order}
-                break
-
-        return result
-
-    def change_status(self, order_id, status):
-        """change delivery order status"""
-        result = {"message": "order unknown"}
-
-        for order in self.order_db:
-            if order['order no'] == order_id:
-                order['status'] = status
-                result = {"message": "order " + order_id +
-                                     " Status changed!", "Order " + order_id: order}
-                break
+            result = self.get_order(order_id)
 
         return result
 
     def get_user_orders(self, user_id):
         """Get orders created by specific order"""
-        users = self.users_db.get_users()
+        query = "SELECT * FROM orders WHERE sender={}".format(user_id)
 
-        user_orders = []
-        for order in self.order_db:
-            if order['sender'] == user_id:
-                for user in users:
-                    if user['user id'] == order['sender']:
-                        order['sender'] = user['username']
-                        break
-                user_orders.append(order)
+        curr = self.order_db.cursor()
+        curr.execute(query)
 
-        return user_orders
+        data = curr.fetchall()
 
-    def get_delivered_orders(self, user_id):
+        response = []
+
+        for row in data:
+            item_resp = {}
+            for i, key in enumerate(curr.description):
+                item_resp[key[0]] = row[i]
+
+            response.append(item_resp)
+
+        return response
+
+    def get_order_amount(self, user_id, status_type):
         """Get delivered orders for a specific user"""
-        user_orders = [order for order in self.order_db if (
-            order['sender'] == user_id and order['status'] == 'delivered')]
+        num = 0
+        db_query = ""
+        if status_type == 'delivered':
+            db_query = "SELECT COUNT(*) FROM orders WHERE status='delivered' and sender={}".format(
+                user_id)
+        else:
+            db_query = "SELECT COUNT(*) FROM orders WHERE status='in-transit' and sender={}".format(
+                user_id)
 
-        return len(user_orders)
+        curr = self.order_db.cursor()
+        curr.execute(db_query)
+        data = curr.fetchone()
 
-    def get_orders_in_transit(self, user_id):
-        """Get orders in transit by a specific user"""
-        user_orders = [order for order in self.order_db if (
-            order['sender'] == user_id and order['status'] == 'in transit')]
-        return len(user_orders)
+        num = data[0]
+
+        return num
 
 
 class ValidateInputs():
@@ -170,6 +180,8 @@ class ValidateInputs():
             message = "location  missing"
         elif not self.user_input['gender']:
             message = "gender missing"
+        elif not self.user_input['type']:
+            message = "type missing"
         elif not self.user_input['password']:
             message = "password missing"
         else:
@@ -190,9 +202,7 @@ class ValidateInputs():
 
     def create_order_inputs(self):
         """confirm inputs for creating order"""
-        if not self.user_input['order no']:
-            message = "order no missing"
-        elif not self.user_input['pick up location']:
+        if not self.user_input['pick up location']:
             message = "pickup location missing"
         elif not self.user_input['delivery location']:
             message = "delivery locationv missing"

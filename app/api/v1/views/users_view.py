@@ -29,6 +29,8 @@ class Users(Resource):
         self.result.add_argument(
             'location', type=str, help="location is required to be a string", required=True, location='json')
         self.result.add_argument(
+            'type', type=str, help="type is required to be a string", required=True, location='json')
+        self.result.add_argument(
             'password', type=str, help="password is required to be a string", required=True, location='json')
         data = self.result.parse_args()
         inputs_validate = ValidateInputs(data, 'create_user')
@@ -48,7 +50,7 @@ class UserSignin(Resource):
         self.orders_db = UsersModel()
 
     def post(self):
-        """Create delivery User"""
+        """Create signin user"""
         result = reqparse.RequestParser()
 
         result.add_argument(
@@ -90,10 +92,9 @@ class UserDeliveredOrders(Resource):
 
     def get(self, userId):
         """Fetch delivery orders delivered for a specific user"""
-        user = self.users_db.get_user(userId)
-        result = self.orders_db.get_delivered_orders(userId)
+        result = self.orders_db.get_order_amount(userId, 'delivered')
 
-        return make_response(jsonify({"Delivered orders for " + user['username']: result}))
+        return make_response(jsonify({"Delivered orders for user" + str(userId): result}))
 
 
 class UserOrdersInTransit(Resource):
@@ -105,7 +106,6 @@ class UserOrdersInTransit(Resource):
 
     def get(self, userId):
         """Fetch delivery orders in transit for a specific user"""
-        user = self.users_db.get_user(userId)
-        result = self.orders_db.get_orders_in_transit(userId)
+        result = self.orders_db.get_order_amount(userId, 'in-transit')
 
-        return make_response(jsonify({"Orders in-transit for " + user['username']: result}))
+        return make_response(jsonify({"Orders in-transit for user" + str(userId): result}))

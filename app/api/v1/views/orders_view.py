@@ -20,8 +20,6 @@ class DeliveryOrders(Resource):
     def post(self):
         """Create delivery order"""
         result = reqparse.RequestParser()
-        result.add_argument(
-            'order no', help="order no is required", required=True)
         result.add_argument('pick up location', type=str,
                             help="pick up location' is required to be a string", required=True)
         result.add_argument('delivery location', type=str,
@@ -66,7 +64,7 @@ class DeliveryOrderUpdate(Resource):
 
     def put(self, parcelId):
         """Cancel a delivery order"""
-        result = self.orders_db.cancel_order(parcelId)
+        result = self.orders_db.update_order(parcelId, 'status', 'canceled')
 
         return make_response(jsonify(result))
 
@@ -85,8 +83,8 @@ class DeliveryOrderDeliveryUpdate(Resource):
         if data_validation != "ok":
             return make_response(jsonify({"Error": data_validation}), 400)
         else:
-            result = orders_db.change_delivery(
-                parcelId, data['delivery location'])
+            result = orders_db.update_order(
+                parcelId, 'delivery', data['delivery location'])
 
             return make_response(jsonify(result))
 
@@ -104,8 +102,8 @@ class DeliveryOrderLocation(Resource):
         if data_validation != "ok":
             return make_response(jsonify({"Error": data_validation}), 400)
         else:
-            result = orders_db.change_location(
-                parcelId, data['current location'])
+            result = orders_db.update_order(
+                parcelId, 'location', data['current location'])
 
             return make_response(jsonify(result))
 
@@ -123,7 +121,7 @@ class DeliveryOrderStatus(Resource):
         if data_validation != "ok":
             return make_response(jsonify({"Error": data_validation}), 400)
         else:
-            result = orders_db.change_status(
-                parcelId, data['status'])
+            result = orders_db.update_order(
+                parcelId, 'status', data['status'])
 
             return make_response(jsonify(result))
