@@ -1,9 +1,10 @@
 """Orders Models"""
-from .users_model import UsersModel
 from app.db_config import init_db
-from app.api.v1.models.users_model import UsersModel, Authenticate_user
+from app.api.v1.models.users_model import UsersModel
+from app.api.v1.models.users_model import Authenticate_user
 
-class OrdersModel():
+
+class OrdersModel(object):
     """Create Orders Model"""
 
     def __init__(self):
@@ -40,9 +41,8 @@ class OrdersModel():
     def get_orders(self, user_auth):
         """Get orders in database"""
         response = []
-        user_details = self.user_db.get_user(user_auth)
 
-        if user_details['type'] == "admin":
+        if self.user_auth.auth_admin(user_auth):
             query = "SELECT * FROM orders"
             curr = self.order_db.cursor()
             curr.execute(query)
@@ -59,21 +59,28 @@ class OrdersModel():
 
         return response
 
-    def get_order(self, order_id):
+    def get_order(self, order_id, user_auth=0):
         """Get a specific order from database"""
+        authenticated_user = True
         result = {}
-        query = "SELECT * FROM orders WHERE order_no={}".format(order_id)
+        if user_auth != 0 and self.user_auth.auth_user(user_auth, order_id):
+            authenticated_user = False
 
-        curr = self.order_db.cursor()
-        curr.execute(query)
+        if authenticated_user:
+            query = "SELECT * FROM orders WHERE order_no={}".format(order_id)
 
-        data = curr.fetchone()
+            curr = self.order_db.cursor()
+            curr.execute(query)
 
-        if not data:
-            result = {"message": "order unknown"}
+            data = curr.fetchone()
+
+            if not data:
+                result = {"message": "order unknown"}
+            else:
+                for i, key in enumerate(curr.description):
+                    result[key[0]] = data[i]
         else:
-            for i, key in enumerate(curr.description):
-                result[key[0]] = data[i]
+            result = {"ERROR": "Forbidden access!!"}
 
         return result
 
@@ -81,8 +88,11 @@ class OrdersModel():
         """Cancel delivery order"""
         result = {}
         update_column = ""
+        if_exist = self.get_order(order_id)
 
-        if self.user_auth.auth_change(user_id, update_col, order_id):
+        if "message" in if_exist:
+            result = {"message": "order unknown"}
+        elif self.user_auth.auth_change(user_id, update_col, if_exist['sender']):
             if update_col == 'status':
                 update_column = "status='{}'".format(col_val)
             elif update_col == 'cancel':
@@ -92,40 +102,37 @@ class OrdersModel():
             else:
                 update_column = "destination='{}'".format(col_val)
 
-            if_exist = self.get_order(order_id)
+            query = "UPDATE orders SET {} WHERE order_no={}".format(
+                update_column, order_id)
+            curr = self.order_db.cursor()
+            curr.execute(query)
+            self.order_db.commit()
 
-            if "message" in if_exist:
-                result = {"message": "order unknown"}
-            else:
-                query = "UPDATE orders SET {} WHERE order_no={}".format(
-                    update_column, order_id)
-                curr = self.order_db.cursor()
-                curr.execute(query)
-                self.order_db.commit()
-
-                result = self.get_order(order_id)
+            result = self.get_order(order_id)
         else:
             result = {"ERROR": "Forbidden access"}
 
         return result
 
-    def get_user_orders(self, user_id):
+    def get_user_orders(self, user_id, auth_user):
         """Get orders created by specific order"""
-        query = "SELECT * FROM orders WHERE sender={}".format(user_id)
-
-        curr = self.order_db.cursor()
-        curr.execute(query)
-
-        data = curr.fetchall()
-
         response = []
+        user_details = self.user_db.get_user(auth_user)
+        if user_id == auth_user or user_details['type'] == 'admin':
+            query = "SELECT * FROM orders WHERE sender={}".format(user_id)
 
-        for row in data:
-            item_resp = {}
-            for i, key in enumerate(curr.description):
-                item_resp[key[0]] = row[i]
+            curr = self.order_db.cursor()
+            curr.execute(query)
 
-            response.append(item_resp)
+            data = curr.fetchall()
+            for row in data:
+                item_resp = {}
+                for i, key in enumerate(curr.description):
+                    item_resp[key[0]] = row[i]
+
+                response.append(item_resp)
+        else:
+            response = [{"ERROR": "Forbidden access!!"}]
 
         return response
 

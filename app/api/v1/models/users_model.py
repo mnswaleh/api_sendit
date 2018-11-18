@@ -94,24 +94,25 @@ class UsersModel():
         return {"access:": access_token, "user:": result}
 
 class Authenticate_user():
+    """Class for user authentication"""
     def __init__(self):
         self.user_db = UsersModel()
 
-    def auth_change(self, user_id, update_type, parcel_id):
+    def auth_change(self, user_id, update_type, sender_id):
+        """authentivatcate updating order"""
         if update_type == "status" or update_type == "location":
             return self.auth_admin(user_id)
         else:
-            return self.auth_user(user_id, parcel_id)
+            return self.auth_user(user_id, sender_id)
 
-    def auth_user(self, user_id, parcel_id):
-
-        if user_id == parcel_id:
+    def auth_user(self, user_id, sender_id):
+        """Authenticate user updating order"""
+        if user_id == sender_id:
             return True
 
     def auth_admin(self, user_id):
+        """Authenticate admin updating order"""
         user_details = self.user_db.get_user(user_id)
 
         if user_details['type'] == "admin":
             return True
-
-        

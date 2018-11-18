@@ -4,7 +4,7 @@ from flask import make_response, jsonify
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.v1.models.users_model import UsersModel
-from app.api.v1.models.orders_model import OrdersModel, ValidateInputs
+from app.api.v1.models.orders_model import OrdersModel, ValidateInputs, Authenticate_user
 
 
 class Users(Resource):
@@ -77,30 +77,27 @@ class UserSignin(Resource):
 
 class UserOrders(Resource):
     """Create Users object to fetch all delivery orders"""
-
-    def __init__(self):
-        self.users_db = UsersModel()
-        self.orders_db = OrdersModel()
-
     @jwt_required
     def get(self, userId):
         """ Fetch all delivery orders created by a specific user"""
-        result = self.orders_db.get_user_orders(userId)
-
-        return make_response(jsonify({"Title": "Delivery orders by user " + str(userId), "Delivery orders list": result}))
+        orders_db = OrdersModel()
+        user_auth = get_jwt_identity()
+        result = orders_db.get_user_orders(userId, user_auth)
+        if result and "ERROR" in result[0]:
+            response = make_response(jsonify(result[0]), 403)
+        else:
+            response = make_response(jsonify({"Title": "Delivery orders by user " + str(userId), "Delivery orders list": result}))
+        
+        return response
 
 
 class UserDeliveredOrders(Resource):
     """Create Users object to fetch specific delivery order"""
-
-    def __init__(self):
-        self.users_db = UsersModel()
-        self.orders_db = OrdersModel()
-
     @jwt_required
     def get(self, userId):
         """Fetch delivery orders delivered for a specific user"""
-        result = self.orders_db.get_order_amount(userId, 'delivered')
+        orders_db = OrdersModel()
+        result = orders_db.get_order_amount(userId, 'delivered')
 
         return make_response(jsonify({"Delivered orders for user" + str(userId): result}))
 
@@ -108,13 +105,10 @@ class UserDeliveredOrders(Resource):
 class UserOrdersInTransit(Resource):
     """User object to fetch orders in transit for a specific user"""
 
-    def __init__(self):
-        self.users_db = UsersModel()
-        self.orders_db = OrdersModel()
-
     @jwt_required
     def get(self, userId):
         """Fetch delivery orders in transit for a specific user"""
-        result = self.orders_db.get_order_amount(userId, 'in-transit')
+        orders_db = OrdersModel()
+        result = orders_db.get_order_amount(userId, 'in-transit')
 
         return make_response(jsonify({"Orders in-transit for user" + str(userId): result}))
