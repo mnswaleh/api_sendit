@@ -118,7 +118,14 @@ class UserOrdersInTransit(Resource):
     def get(self, userId):
         """Fetch delivery orders in transit for a specific user"""
         orders_db = OrdersModel()
+        response = {}
         user_auth = get_jwt_identity()
         result = orders_db.get_order_amount(userId, 'in-transit', user_auth)
+        if result == "Forbid":
+            response = make_response(
+                jsonify({"ERROR": "Forbidden Access"}), 403)
+        else:
+            response = make_response(
+                jsonify({"Orders in-transit for user " + str(userId): result}))
 
-        return make_response(jsonify({"Orders in-transit for user " + str(userId): result}))
+        return response
