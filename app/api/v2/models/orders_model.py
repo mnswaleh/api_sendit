@@ -196,7 +196,7 @@ class ValidateInputs():
             message = "First name should be between 3-20 alphabetical characters"
         elif not re.match("^[a-zA-Z]{3,20}$", self.user_input['second_name']):
             message = "Second name should be between 3-20 alphabetic characters"
-        elif not validate_email(self.user_input['email'], check_mx=True):
+        elif not validate_email(self.user_input['email']):
             message = "Invalid email"
         elif not re.match("^[a-zA-Z]{3,20}$", self.user_input['location']):
             message = "Location should be between 3-20 alphabeticcharacters"
