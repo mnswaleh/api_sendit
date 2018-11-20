@@ -104,7 +104,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
 
         result = json.loads(response.data)
-        self.assertIn('missing', str(result))
+        self.assertIn('Error', str(result))
 
     def test_get_all_orders(self):
         """Test endpoint to fetch all orders"""
