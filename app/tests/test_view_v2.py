@@ -82,6 +82,8 @@ class TestDeliveryOrders(unittest.TestCase):
     def test_create_order(self):
         """Test endpoint to create order"""
         response = self.app.post(
+            '/api/v2/auth/signup', data=json.dumps(self.admin_data), content_type='application/json')
+        response = self.app.post(
             '/api/v2/auth/signup', data=json.dumps(self.user_data), content_type='application/json')
         user_login = {
             "username": self.user_data['username'], "password": self.user_data['password']}
@@ -89,7 +91,7 @@ class TestDeliveryOrders(unittest.TestCase):
             '/api/v2/auth/login', data=json.dumps(user_login), content_type='application/json')
 
         result = json.loads(response.data)
-        self.test_create_admin()
+        
         req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
         response = self.app.post(
             '/api/v2/parcels', data=json.dumps(self.order_data), headers=req_header, content_type='application/json')
@@ -148,7 +150,7 @@ class TestDeliveryOrders(unittest.TestCase):
         """Test endpoint to fetch delivery orders for a specific user"""
         self.test_create_order()
         user_login = {
-            "username": self.user_data['username'], "password": self.user_data['password']}
+            "username": self.admin_data['username'], "password": self.admin_data['password']}
         response = self.app.post(
             '/api/v2/auth/login', data=json.dumps(user_login), content_type='application/json')
         self.assertEqual(response.status_code, 200)
@@ -160,7 +162,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        self.assertIn('order_no', str(result))
+        self.assertIn('Delivery orders list', str(result))
 
     def test_cancel_delivery_order(self):
         """Test endpoint to cancel delivery order"""
@@ -236,7 +238,8 @@ class TestDeliveryOrders(unittest.TestCase):
 
     def test_get_delivered_orders_for_user(self):
         """Test endpoint to get the number of delivered orders for a specific user"""
-        self.test_create_admin()
+        response = self.app.post(
+            '/api/v2/auth/signup', data=json.dumps(self.admin_data), content_type='application/json')
         user_login = {
             "username": self.admin_data['username'], "password": self.admin_data['password']}
         response = self.app.post(
@@ -254,7 +257,8 @@ class TestDeliveryOrders(unittest.TestCase):
 
     def test_get_in_transit_orders_for_user(self):
         """Test endpoint to get the number of orders in transit for a specific user"""
-        self.test_create_admin()
+        response = self.app.post(
+            '/api/v2/auth/signup', data=json.dumps(self.admin_data), content_type='application/json')
         user_login = {
             "username": self.admin_data['username'], "password": self.admin_data['password']}
         response = self.app.post(
