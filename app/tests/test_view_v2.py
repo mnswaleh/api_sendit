@@ -12,7 +12,7 @@ class TestDeliveryOrders(unittest.TestCase):
         create_app('app.config.TestingConfig').testing = True
         self.app = create_app('app.config.TestingConfig').test_client()
         self.user_data = {
-            "username": "tom",
+            "username": "tomtom",
             "first_name": "thomas",
             "second_name": "wakati",
             "email": "mnswaleh@gmail.com",
@@ -68,7 +68,8 @@ class TestDeliveryOrders(unittest.TestCase):
 
     def test_signin_user(self):
         """Test endpoint to signin user"""
-        self.test_create_user()
+        response = self.app.post(
+            '/api/v2/auth/signup', data=json.dumps(self.user_data), content_type='application/json')
         user_login = {
             "username": self.user_data['username'], "password": self.user_data['password']}
         response = self.app.post(
@@ -80,7 +81,8 @@ class TestDeliveryOrders(unittest.TestCase):
 
     def test_create_order(self):
         """Test endpoint to create order"""
-        self.test_create_user()
+        response = self.app.post(
+            '/api/v2/auth/signup', data=json.dumps(self.user_data), content_type='application/json')
         user_login = {
             "username": self.user_data['username'], "password": self.user_data['password']}
         response = self.app.post(
