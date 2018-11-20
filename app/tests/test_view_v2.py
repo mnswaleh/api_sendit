@@ -82,8 +82,6 @@ class TestDeliveryOrders(unittest.TestCase):
     def test_create_order(self):
         """Test endpoint to create order"""
         response = self.app.post(
-            '/api/v2/auth/signup', data=json.dumps(self.admin_data), content_type='application/json')
-        response = self.app.post(
             '/api/v2/auth/signup', data=json.dumps(self.user_data), content_type='application/json')
         user_login = {
             "username": self.user_data['username'], "password": self.user_data['password']}
@@ -99,6 +97,9 @@ class TestDeliveryOrders(unittest.TestCase):
 
         result = json.loads(response.data)
         self.assertIn('pending', str(result))
+
+        response = self.app.post(
+            '/api/v2/auth/signup', data=json.dumps(self.admin_data), content_type='application/json')
 
         new_order = self.order_data
         new_order['pick up location'] = ""
