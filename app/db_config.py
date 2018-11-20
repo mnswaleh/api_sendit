@@ -1,19 +1,24 @@
-import os
+"""Module for application database"""
+from flask import current_app
 import psycopg2
 
-url = "host='localhost' dbname='apisendit' port='5432' user='postgres' password='92203243'"
 
 def connection(url):
-    con = psycopg2.connect(url)
+    """open database connection"""
+    con = psycopg2.connect(current_app.config['DATABASE_URL'])
     return con
+
 
 def init_db():
-    con = connection(url)
+    """Initiate databse connection"""
+    con = connection(current_app.config['DATABASE_URL'])
     return con
 
+
 def create_tables():
+    """Create application database tables"""
     tables_q = tables()
-    conn = connection(url)
+    conn = connection(current_app.config['DATABASE_URL'])
     curl = conn.cursor()
 
     for table in tables_q:
@@ -21,13 +26,15 @@ def create_tables():
 
     conn.commit()
 
+
 def destroy_tables():
+    """destroy application database tables"""
     orders_tbl = """DROP TABLE IF EXISTS orders CASCADE;"""
     users_tbl = """DROP TABLE IF EXISTS users CASCADE;"""
 
     query = [orders_tbl, users_tbl]
 
-    conn = connection(url)
+    conn = connection(current_app.config['DATABASE_URL'])
     curl = conn.cursor()
 
     for table in query:
@@ -35,7 +42,9 @@ def destroy_tables():
 
     conn.commit()
 
+
 def tables():
+    """Create table queries"""
     tb_orders = """CREATE TABLE IF NOT EXISTS orders(
         order_no SERIAL PRIMARY KEY NOT NULL,
         pickup CHARACTER VARYING(50) NOT NULL,
@@ -59,4 +68,5 @@ def tables():
         password TEXT NOT NULL);"""
 
     query = [tb_orders, tb_users]
+
     return query

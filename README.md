@@ -6,13 +6,16 @@
 API has the following features:
 1. GET /parcels
 2. GET /parcels/<parcelId>
-3. PUT /parcels/<parcelId>
+3. PUT /parcels/<parcelId>/status
 4. PUT /parcels/<parcelId>/cancel
-5. PUT /parcels/<parcelId>/change-delivery
-6. GET /users/<userId>/in-transit
-7. GET /users/<userId>/delivered
-8. GET /users/<userId>/parcels
-9. POST /parcels
+5. PUT /parcels/<parcelId>/destination
+6. PUT /parcels/<parcelId>/presentLocation
+7. GET /users/<userId>/in-transit
+8. GET /users/<userId>/delivered
+9. GET /users/<userId>/parcels
+10. POST /parcels
+11. POST /auth/signup
+12. POST /auth/login
 
 # INSTALLATION
 pip install virtualenv
@@ -22,7 +25,7 @@ pip install virtualenv
 2. Open Terminal on this folder
 3. Type
     ```
-     git clone https://github.com/mnswaleh/apisendIT/tree/bg-change-delivery-location-161859761 .
+     git clone https://github.com/mnswaleh/api_sendit.git .
     ```
 
 ###### create virtual evironment:
@@ -34,6 +37,11 @@ source venv/bin/activate
 ```
 pip install -r requirements.txt
 ```
+
+###### create Database:
+on postreSQL database create
+1. apisendit database
+2. apitest database
 
 # TEST
 install postman
@@ -56,7 +64,7 @@ on terminal: type
 1. Enter URL http://127.0.0.1:5000/api/v1/auth/signup
 2. send post request with user details eg,
 ```
-    {
+{
     "username": "tom",
     "first_name": "thomas",
     "second_name": "Kalume",
@@ -66,18 +74,21 @@ on terminal: type
     "password": "243677"
 }
 ```
-3. should receive response with code 201 and user details eg,
+3. should receive response with code 201 and user details access tokeneg,
 ```
-    {
-    "email": "tom@gmail.com",
-    "first_name": "thomas",
-    "gender": "male",
-    "location": "kakamega",
-    "password": "243677",
-    "second_name": "Kalume",
-    "type": "user",
-    "user id": 1,
-    "username": "tom"
+{
+    "access:": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDI2NTIzNDgsIm5iZiI6MTU0MjY1MjM0OCwianRpIjoiYmQ0YTc1MWEtMmNhMy00YzhlLTkyYTgtNGEwZjIyMmNlOTJiIiwiZXhwIjoxNTQyNjUzMjQ4LCJpZGVudGl0eSI6MSwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIn0.lhTNtrG58sk7muegEBtiymc2NGphTOae8dQgZAH7kyQ",
+    "user:": {
+        "email": "tom@gmail.com",
+        "firstname": "thomas",
+        "gender": "male",
+        "location": "kakamega",
+        "password": "$2b$12$ropcC2L5z0xeqrjwmcF10eAC8SizfmezkhFkQwaxAQ9v8vIwb0mxm",
+        "secondname": "Kalume",
+        "type": "user",
+        "user_id": 1,
+        "username": "tom"
+    }
 }
 ```
 
@@ -85,31 +96,36 @@ on terminal: type
 1. Enter URL http://127.0.0.1:5000/api/v1/auth/login
 2. send post request with username and password eg,
 ```
-    {
+{
     "username": "tom",
     "password": "243677"
 }
 ```
-3. should receive response with code 201 and user details eg,
+3. should receive response with code 201, user details and access tokeneg,
 ```
-    {
-    "email": "tom@gmail.com",
-    "first_name": "thomas",
-    "gender": "male",
-    "location": "kakamega",
-    "password": "243677",
-    "second_name": "Kalume",
-    "type": "user",
-    "user id": 1,
-    "username": "tom"
+{
+    "access:": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDI2NTIzNDgsIm5iZiI6MTU0MjY1MjM0OCwianRpIjoiYmQ0YTc1MWEtMmNhMy00YzhlLTkyYTgtNGEwZjIyMmNlOTJiIiwiZXhwIjoxNTQyNjUzMjQ4LCJpZGVudGl0eSI6MSwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIn0.lhTNtrG58sk7muegEBtiymc2NGphTOae8dQgZAH7kyQ",
+    "user:": {
+        "email": "tom@gmail.com",
+        "firstname": "thomas",
+        "gender": "male",
+        "location": "kakamega",
+        "password": "$2b$12$ropcC2L5z0xeqrjwmcF10eAC8SizfmezkhFkQwaxAQ9v8vIwb0mxm",
+        "secondname": "Kalume",
+        "type": "user",
+        "user_id": 1,
+        "username": "tom"
+    }
 }
 ```
 
 ###### CREATE ORDER
-1. Enter URL http://127.0.0.1:5000/api/v1/parcels
-2. send post request with delivery order eg,
+1. Login as user
+2. Copy the access token and paste it as Bearer Token on headers
+3. Enter URL http://127.0.0.1:5000/api/v1/parcels
+4. send post request with delivery order eg,
 ```
-    {
+{
 	"pick up location": "nyahururu",
 	"delivery location": "kitale",
 	"weight": 2,
@@ -117,15 +133,12 @@ on terminal: type
 	"sender": 1
 }
 ```
-3. should receive response with code 201 and order details eg,
+5. should receive response with code 201 and order details eg,
 ```
-    {
-    "current location": "nyahururu",
-    "date created": "12/11/2018",
-    "delivery location": "kitale",
-    "order id": 1,
-    "order no": "367857",
-    "pick up location": "nyahururu",
+{
+    "current_location": "nyahururu",
+    "delivery_location": "kitale",
+    "pick_up_location": "nyahururu",
     "price": 200,
     "sender": 1,
     "status": "pending",
@@ -134,184 +147,191 @@ on terminal: type
 ```
 
 ###### FETCH ALL ORDERS
-1. Enter URL http://127.0.0.1:5000/api/v1/parcels
-2. send get request 
-3. should receive response with code 200 and all delivery orders created eg,
-    {
+1. Login as admin
+2. Copy the access token and paste it as Bearer Token on headers
+3. Enter URL http://127.0.0.1:5000/api/v1/parcels
+4. send get request 
+5. should receive response with code 200 and all delivery orders created eg,
+```
+{
     "Delivery orders list": [
         {
-            "current location": "nyahururu",
-            "date created": "12/11/2018",
-            "delivery location": "kitale",
-            "order id": 1,
-            "order no": "367857",
-            "pick up location": "nyahururu",
+            "created": "Mon, 19 Nov 2018 00:00:00 GMT",
+            "current_location": "nyahururu",
+            "destination": "kitale",
+            "order_no": 1,
+            "pickup": "nyahururu",
             "price": 200,
-            "sender": "tom",
+            "sender": 1,
             "status": "pending",
             "weight": 2
         }
     ],
     "Title": "Delivery orders"
 }
+```
 
 ###### FETCH ORDERS OF A PARTICULAR USER
-1. Enter URL http://127.0.0.1:5000/api/v1/users/1/parcels
-2. send get request 
-3. should receive response with code 200 and all delivery orders created by user with user id 1 ie,
+1. Login as admin or user
+2. Copy the access token and paste it as Bearer Token on headers
+3. Enter URL http://127.0.0.1:5000/api/v1/users/1/parcels
+4. send get request 
+5. should receive response with code 200 and all delivery orders created by user with user id 1 ie,
 ```
-    {
+{
     "Delivery orders list": [
         {
-            "current location": "nyahururu",
-            "date created": "12/11/2018",
-            "delivery location": "kitale",
-            "order id": 1,
-            "order no": "367857",
-            "pick up location": "nyahururu",
+            "created": "Mon, 19 Nov 2018 00:00:00 GMT",
+            "current_location": "nyahururu",
+            "destination": "kitale",
+            "order_no": 1,
+            "pickup": "nyahururu",
             "price": 200,
-            "sender": "tom",
+            "sender": 1,
             "status": "pending",
             "weight": 2
         }
     ],
-    "Title": "Delivery orders by tom"
+    "Title": "Delivery orders by user 1"
 }
 ```
 
 ###### FETCH PARTICULAR ORDER
-1. Enter URL http://127.0.0.1:5000/api/v1/parcels/367857
-2. send get request 
-3. should receive response with code 200 and details of order 367857 ie,
+1. Login as admin or user
+2. Copy the access token and paste it as Bearer Token on headers
+3. Enter URL http://127.0.0.1:5000/api/v1/parcels/1
+4. send get request 
+5. should receive response with code 200 and details of order 367857 ie,
 ```
-    {
-    "current location": "nyahururu",
-    "date created": "12/11/2018",
-    "delivery location": "kitale",
-    "order id": 1,
-    "order no": "367857",
-    "pick up location": "nyahururu",
+{
+    "created": "Mon, 19 Nov 2018 00:00:00 GMT",
+    "current_location": "nyahururu",
+    "destination": "kitale",
+    "order_no": 1,
+    "pickup": "nyahururu",
     "price": 200,
-    "sender": "tom",
+    "sender": 1,
     "status": "pending",
     "weight": 2
 }
 ```
 
 ###### CANCEL PARCEL DELIVERY ORDER
-1. Enter URL http://127.0.0.1:5000/api/v1/parcels/367857/cancel
-2. send put request 
-3. should receive response with code 200 and details of order 367857 with status as canceled ie,
+1. Login as user
+2. Copy the access token and paste it as Bearer Token on headers
+3. Enter URL http://127.0.0.1:5000/api/v1/parcels/1/cancel
+4. send put request 
+5. should receive response with code 200 and details of order 1 with status as canceled ie,
 ```
-    {
-    "Order 367857": {
-        "current location": "nyahururu",
-        "date created": "12/11/2018",
-        "delivery location": "kitale",
-        "order id": 1,
-        "order no": "367857",
-        "pick up location": "nyahururu",
-        "price": 200,
-        "sender": "tom",
-        "status": "canceled",
-        "weight": 2
-    },
-    "message": "order 367857 is canceled!"
+{
+    "created": "Mon, 19 Nov 2018 00:00:00 GMT",
+    "current_location": "nyahururu",
+    "destination": "kitale",
+    "order_no": 1,
+    "pickup": "nyahururu",
+    "price": 200,
+    "sender": 1,
+    "status": "canceled",
+    "weight": 2
 }
 ```
 
 ###### CHANGE DELIVERY LOCATION
-1. Enter URL http://127.0.0.1:5000/api/v1/parcels/367857/destination
-2. send put request with desired delivery location eg,
+1. Login as user
+2. Copy the access token and paste it as Bearer Token on headers
+3. Enter URL http://127.0.0.1:5000/api/v1/parcels/1/destination
+4. send put request with desired delivery location eg,
 ```
-    {
+{
 	"delivery location": "kisumu"
 }
 ```
-3. should receive response with code 200 and details of order 367857 with new delivery location eg,
+4. should receive response with code 200 and details of order 1 with new delivery location eg,
 ```
-    {
-    "Order 367857": {
-        "current location": "nyahururu",
-        "date created": "12/11/2018",
-        "delivery location": "kisumu",
-        "order id": 1,
-        "order no": "367857",
-        "pick up location": "nyahururu",
-        "price": 200,
-        "sender": "tom",
-        "status": "canceled",
-        "weight": 2
-    },
-    "message": "order 367857 Delivery location changed!"
+{
+    "created": "Mon, 19 Nov 2018 00:00:00 GMT",
+    "current_location": "nyahururu",
+    "destination": "kisumu",
+    "order_no": 1,
+    "pickup": "nyahururu",
+    "price": 200,
+    "sender": 1,
+    "status": "canceled",
+    "weight": 2
 }
 ```
 
 ###### CHANGE ORDER CURRENT LOCATION
-1. Enter URL http://127.0.0.1:5000/api/v1/parcels/367857/presentLocation
-2. send put request with current location eg,
+1. Login as admin
+2. Copy the access token and paste it as Bearer Token on headers
+3. Enter URL http://127.0.0.1:5000/api/v1/parcels/1/presentLocation
+4. send put request with current location eg,
 ```
-    {
+{
 	"current location": "naivasha"
 }
 ```
-3. should receive response with code 200 and details of order 367857 with new current location eg,
+5. should receive response with code 200 and details of order 1 with new current location eg,
 ```
-    {
-    "current location": "naivasha",
-    "date created": "12/11/2018",
-    "delivery location": "kisumu",
-    "order id": 1,
-    "order no": "367857",
-    "pick up location": "nyahururu",
+{
+    "created": "Mon, 19 Nov 2018 00:00:00 GMT",
+    "current_location": "naivasha",
+    "destination": "kisumu",
+    "order_no": 1,
+    "pickup": "nyahururu",
     "price": 200,
-    "sender": "tom",
+    "sender": 1,
     "status": "canceled",
     "weight": 2
 }
 ```
 
 ###### CHANGE ORDER STATUS
-1. Enter URL http://127.0.0.1:5000/api/v1/parcels/367857/status
-2. send put request with status eg,
+1. Login as admin
+2. Copy the access token and paste it as Bearer Token on headers
+3. Enter URL http://127.0.0.1:5000/api/v1/parcels/1/status
+4. send put request with status eg,
 ```
-    {
+{
 	"status": "in transit"
 }
 ```
-3. should receive response with code 200 and details of order 367857 with new status eg,
+5. should receive response with code 200 and details of order 1 with new status eg,
 ```
-    {
-    "current location": "naivasha",
-    "date created": "12/11/2018",
-    "delivery location": "kisumu",
-    "order id": 1,
-    "order no": "367857",
-    "pick up location": "nyahururu",
+{
+    "created": "Mon, 19 Nov 2018 00:00:00 GMT",
+    "current_location": "naivasha",
+    "destination": "kisumu",
+    "order_no": 1,
+    "pickup": "nyahururu",
     "price": 200,
-    "sender": "tom",
+    "sender": 1,
     "status": "in transit",
     "weight": 2
 }
 ```
 
 ###### GET ORDERS OF A PARTICULAR USER THAT ARE DELIVERED
-1. Enter URL http://127.0.0.1:5000/api/v1/users/1/delivered
-2. send get request 
-3. should receive response with code 200 and the number of orders of user 1 that are delivered ie,
+1. Login as admin or user
+2. Copy the access token and paste it as Bearer Token on headers
+3. Enter URL http://127.0.0.1:5000/api/v1/users/1/delivered
+4. send get request 
+5. should receive response with code 200 and the number of orders of user 1 that are delivered ie,
 ```
-    {
-    "Delivered orders for tom": 0
+{
+    "Delivered orders for user 1": 0
 }
 ```
 
 ###### GET ORDERS OF A PARTICULAR USER THAT ARE IN TRANSIT
-1. Enter URL http://127.0.0.1:5000/api/v1/users/1/in-transit
-2. send get request 
-3. should receive response with code 200 and the number of orders of user 1 that are in transit ie,
+1. Login as admin or user
+2. Copy the access token and paste it as Bearer Token on headers
+3. Enter URL http://127.0.0.1:5000/api/v1/users/1/in-transit
+4. send get request 
+5. should receive response with code 200 and the number of orders of user 1 that are in transit ie,
 ```
-    {
-    "Orders in-transit for tom": 0
+{
+    "Orders in-transit for user 1": 0
 }
 ```
 

@@ -16,13 +16,13 @@ API = Api(VERSION1)
 API.add_resource(DeliveryOrders, '/parcels', strict_slashes=False)
 API.add_resource(DeliveryOrder, '/parcels/<parcelId>', strict_slashes=False)
 API.add_resource(DeliveryOrderUpdate,
-                 '/parcels/<parcelId>/cancel', strict_slashes=False)
+                 '/parcels/<int:parcelId>/cancel', strict_slashes=False)
 API.add_resource(DeliveryOrderDeliveryUpdate,
-                 '/parcels/<parcelId>/destination', strict_slashes=False)
+                 '/parcels/<int:parcelId>/destination', strict_slashes=False)
 API.add_resource(DeliveryOrderLocation,
-                 '/parcels/<parcelId>/presentLocation', strict_slashes=False)
+                 '/parcels/<int:parcelId>/presentLocation', strict_slashes=False)
 API.add_resource(DeliveryOrderStatus,
-                 '/parcels/<parcelId>/status', strict_slashes=False)
+                 '/parcels/<int:parcelId>/status', strict_slashes=False)
 API.add_resource(UserOrders, '/users/<int:userId>/parcels',
                  strict_slashes=False)
 API.add_resource(UserDeliveredOrders,

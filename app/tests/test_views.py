@@ -9,8 +9,8 @@ class TestDeliveryOrders(unittest.TestCase):
 
     def setUp(self):
         """Set up test"""
-        create_app().testing = True
-        self.app = create_app().test_client()
+        create_app('app.config.TestingConfig').testing = True
+        self.app = create_app('app.config.TestingConfig').test_client()
         self.user_data = {
             "username": "tom",
             "first_name": "thomas",
@@ -22,12 +22,22 @@ class TestDeliveryOrders(unittest.TestCase):
             "password": "123456"
         }
 
+        self.admin_data = {
+            "username": "tito",
+            "first_name": "titaus",
+            "second_name": "mzalendo",
+            "email": "mzalendo@gmail.com",
+            "gender": "male",
+            "location": "narok",
+            "type": "admin",
+            "password": "876543"
+        }
+
         self.order_data = {
             "pick up location": "nanyuki",
             "delivery location": "nairobi",
             "weight": 2,
-            "price": 2000,
-            "sender": 1
+            "price": 2000
         }
 
         self.edit_data = {
@@ -35,6 +45,8 @@ class TestDeliveryOrders(unittest.TestCase):
             "current location": "kikuyu",
             "status": "in transit"
         }
+
+        self.headers = {}
 
     def test_create_user(self):
         """Test endpoint to create user"""
@@ -45,12 +57,22 @@ class TestDeliveryOrders(unittest.TestCase):
         result = json.loads(response.data)
         self.assertIn('email@gmail.com', str(result))
 
+    def test_create_admin(self):
+        """Test endpoint to create user"""
+        response = self.app.post(
+            '/api/v1/auth/signup', data=json.dumps(self.admin_data), content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+
+        result = json.loads(response.data)
+        self.assertIn('admin', str(result))
+
     def test_signin_user(self):
         """Test endpoint to signin user"""
         self.test_create_user()
-        user_login = self.user_data
+        user_login = {
+            "username": self.user_data['username'], "password": self.user_data['password']}
         response = self.app.post(
-            '/api/v1/auth/login', data=json.dumps({"username": user_login['username'], "password": user_login['password']}), content_type='application/json')
+            '/api/v1/auth/login', data=json.dumps(user_login), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
@@ -59,7 +81,13 @@ class TestDeliveryOrders(unittest.TestCase):
     def test_create_order(self):
         """Test endpoint to create order"""
         response = self.app.post(
-            '/api/v1/parcels', data=json.dumps(self.order_data), content_type='application/json')
+            '/api/v1/auth/signup', data=json.dumps(self.user_data), content_type='application/json')
+
+        result = json.loads(response.data)
+        self.test_create_admin()
+        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
+        response = self.app.post(
+            '/api/v1/parcels', data=json.dumps(self.order_data), headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
         result = json.loads(response.data)
@@ -69,7 +97,7 @@ class TestDeliveryOrders(unittest.TestCase):
         new_order['pick up location'] = ""
 
         response = self.app.post(
-            '/api/v1/parcels', data=json.dumps(new_order), content_type='application/json')
+            '/api/v1/parcels', data=json.dumps(new_order), headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
         result = json.loads(response.data)
@@ -78,8 +106,16 @@ class TestDeliveryOrders(unittest.TestCase):
     def test_get_all_orders(self):
         """Test endpoint to fetch all orders"""
         self.test_create_order()
+        user_login = {
+            "username": self.admin_data['username'], "password": self.admin_data['password']}
+        response = self.app.post(
+            '/api/v1/auth/login', data=json.dumps(user_login), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        result = json.loads(response.data)
+        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
         response = self.app.get(
-            '/api/v1/parcels', content_type='application/json')
+            '/api/v1/parcels', headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
@@ -88,8 +124,16 @@ class TestDeliveryOrders(unittest.TestCase):
     def test_get_specific_order(self):
         """Test endpoint to fetch a spoecific order"""
         self.test_create_order()
+        user_login = {
+            "username": self.user_data['username'], "password": self.user_data['password']}
+        response = self.app.post(
+            '/api/v1/auth/login', data=json.dumps(user_login), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        result = json.loads(response.data)
+        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
         response = self.app.get(
-            '/api/v1/parcels/1', content_type='application/json')
+            '/api/v1/parcels/1', headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
@@ -98,8 +142,16 @@ class TestDeliveryOrders(unittest.TestCase):
     def test_get_delivery_orders_by_user(self):
         """Test endpoint to fetch delivery orders for a specific user"""
         self.test_create_order()
+        user_login = {
+            "username": self.user_data['username'], "password": self.user_data['password']}
+        response = self.app.post(
+            '/api/v1/auth/login', data=json.dumps(user_login), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        result = json.loads(response.data)
+        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
         response = self.app.get(
-            '/api/v1/users/1/parcels', content_type='application/json')
+            '/api/v1/users/1/parcels', headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
@@ -108,8 +160,16 @@ class TestDeliveryOrders(unittest.TestCase):
     def test_cancel_delivery_order(self):
         """Test endpoint to cancel delivery order"""
         self.test_create_order()
+        user_login = {
+            "username": self.user_data['username'], "password": self.user_data['password']}
+        response = self.app.post(
+            '/api/v1/auth/login', data=json.dumps(user_login), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        result = json.loads(response.data)
+        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
         response = self.app.put(
-            '/api/v1/parcels/1/cancel', content_type='application/json')
+            '/api/v1/parcels/1/cancel', headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
@@ -118,8 +178,16 @@ class TestDeliveryOrders(unittest.TestCase):
     def test_edit_current_location(self):
         """Test endpoint to change current location"""
         self.test_create_order()
+        user_login = {
+            "username": self.admin_data['username'], "password": self.admin_data['password']}
+        response = self.app.post(
+            '/api/v1/auth/login', data=json.dumps(user_login), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        result = json.loads(response.data)
+        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
         response = self.app.put(
-            '/api/v1/parcels/1/presentLocation', data=json.dumps(self.edit_data), content_type='application/json')
+            '/api/v1/parcels/1/presentLocation', headers=req_header, data=json.dumps(self.edit_data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
@@ -128,8 +196,16 @@ class TestDeliveryOrders(unittest.TestCase):
     def test_edit_status(self):
         """Test endpoint to change status"""
         self.test_create_order()
+        user_login = {
+            "username": self.admin_data['username'], "password": self.admin_data['password']}
+        response = self.app.post(
+            '/api/v1/auth/login', data=json.dumps(user_login), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        result = json.loads(response.data)
+        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
         response = self.app.put(
-            '/api/v1/parcels/1/status', data=json.dumps(self.edit_data), content_type='application/json')
+            '/api/v1/parcels/1/status', headers=req_header, data=json.dumps(self.edit_data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
@@ -138,9 +214,16 @@ class TestDeliveryOrders(unittest.TestCase):
     def test_change_delivery_location(self):
         """Test endpoint to change delivery location"""
         self.test_create_order()
+        user_login = {
+            "username": self.user_data['username'], "password": self.user_data['password']}
+        response = self.app.post(
+            '/api/v1/auth/login', data=json.dumps(user_login), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
 
+        result = json.loads(response.data)
+        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
         response = self.app.put(
-            '/api/v1/parcels/1/destination', data=json.dumps(self.edit_data), content_type='application/json')
+            '/api/v1/parcels/1/destination', headers=req_header, data=json.dumps(self.edit_data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
@@ -148,8 +231,13 @@ class TestDeliveryOrders(unittest.TestCase):
 
     def test_get_delivered_orders_for_user(self):
         """Test endpoint to get the number of delivered orders for a specific user"""
+        response = self.app.post(
+            '/api/v1/auth/signup', data=json.dumps(self.user_data), content_type='application/json')
+
+        result = json.loads(response.data)
+        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
         response = self.app.get(
-            '/api/v1/users/1/delivered', content_type='application/json')
+            '/api/v1/users/1/delivered', headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
@@ -157,8 +245,13 @@ class TestDeliveryOrders(unittest.TestCase):
 
     def test_get_in_transit_orders_for_user(self):
         """Test endpoint to get the number of orders in transit for a specific user"""
+        response = self.app.post(
+            '/api/v1/auth/signup', data=json.dumps(self.user_data), content_type='application/json')
+
+        result = json.loads(response.data)
+        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
         response = self.app.get(
-            '/api/v1/users/1/in-transit', content_type='application/json')
+            '/api/v1/users/1/in-transit', headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
