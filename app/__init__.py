@@ -4,6 +4,7 @@ from flask import Flask, Blueprint
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from app.api.v1 import VERSION1
+from app.api.v2 import VERSION2
 from .db_config import create_tables, destroy_tables
 
 
@@ -18,4 +19,5 @@ def create_app(obj_config):
             destroy_tables()
         create_tables()
     app.register_blueprint(VERSION1)
+    app.register_blueprint(VERSION2)
     return app
