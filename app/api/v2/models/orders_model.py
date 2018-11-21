@@ -41,7 +41,7 @@ class OrdersModel():
         """Get orders in database"""
         response = []
 
-        if self.user_auth.auth_admin(user_auth):
+        if user_auth == "admin":
             query = "SELECT * FROM orders"
             curr = self.order_db.cursor()
             curr.execute(query)
@@ -92,7 +92,7 @@ class OrdersModel():
 
         if "message" in if_exist:
             result = {"message": "order unknown"}
-        elif if_exist['sender'] == user_auth[0] and user_auth[]:
+        elif if_exist['sender'] == user_auth[0] or user_auth[1] == "admin":
             if update_col == 'status':
                 update_column = "status='{}'".format(col_val)
             elif update_col == 'cancel':
@@ -158,6 +158,9 @@ class OrdersModel():
         else:
             return "Forbid"
 
+    def final_response(self, result):
+        pass
+
 
 class ValidateInputs():
     """Class to validate inputs entered by user"""
@@ -204,8 +207,10 @@ class ValidateInputs():
             message = "user type should be 'admin' or 'user'"
         elif not re.match("^[a-zA-Z0-9]{6,20}$", self.user_input['password']):
             message = "password should have capital letter,small letter, number and be between 6-10 alphanumeric characters"
+        elif self.user_db.get_username(self.user_input['username']) != "ok":
+            message = "username alredy exists!!"
         else:
-            message = self.user_db.get_username(self.user_input['username'])
+            message = "ok"
 
         return message
 

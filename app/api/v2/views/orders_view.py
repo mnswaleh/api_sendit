@@ -17,7 +17,7 @@ class DeliveryOrders(Resource):
     def get(self):
         """Fetch all orders"""
         user_auth = get_jwt_identity()
-        result = self.orders_db.get_orders(user_auth[0])
+        result = self.orders_db.get_orders(user_auth[1])
         response = {}
         if result and "ERROR" in result[0]:
             response = make_response(jsonify(result[0]), 403)
@@ -95,7 +95,7 @@ class DeliveryOrderUpdate(Resource):
         user_auth = get_jwt_identity()
         response = {}
         result = self.orders_db.update_order(
-            parcelId, 'cancel', 'canceled', user_auth[0])
+            parcelId, 'cancel', 'canceled', user_auth)
 
         if "ERROR" in result:
             response = make_response(jsonify(result), 403)
@@ -125,7 +125,7 @@ class DeliveryOrderDeliveryUpdate(Resource):
             response = make_response(jsonify({"Error": data_validation}), 400)
         else:
             result = orders_db.update_order(
-                parcelId, 'delivery', data['delivery location'], user_auth[0])
+                parcelId, 'delivery', data['delivery location'], user_auth)
             if "ERROR" in result:
                 response = make_response(jsonify(result), 403)
             elif "message" in result:
@@ -154,7 +154,7 @@ class DeliveryOrderLocation(Resource):
             response = make_response(jsonify({"Error": data_validation}), 400)
         else:
             result = orders_db.update_order(
-                parcelId, 'location', data['current location'], user_auth[0])
+                parcelId, 'location', data['current location'], user_auth)
             if "ERROR" in result:
                 response = make_response(jsonify(result), 403)
             elif "message" in result:
@@ -182,7 +182,7 @@ class DeliveryOrderStatus(Resource):
             response = make_response(jsonify({"Error": data_validation}), 400)
         else:
             result = orders_db.update_order(
-                parcelId, 'status', data['status'], user_auth[0])
+                parcelId, 'status', data['status'], user_auth)
             if "ERROR" in result:
                 response = make_response(jsonify(result), 403)
             elif "message" in result:

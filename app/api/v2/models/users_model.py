@@ -33,7 +33,8 @@ class UsersModel():
         if result == "ok":
             return "Signup Failed!"
         else:
-            return "Signup successul!"
+            del result["password"]
+            return {"message": "Signup successul!", "user": result}
 
     def get_user(self, user_id):
         """Get a specific user from the database"""
@@ -64,7 +65,8 @@ class UsersModel():
         data = curr.fetchone()
 
         if data:
-            result = "username already exists"
+            for i, key in enumerate(curr.description):
+                result[key[0]] = data[i]
         else:
             result = "ok"
 
@@ -91,5 +93,6 @@ class UsersModel():
                 result = user_data
                 access_token = create_access_token(
                     identity=[result['user_id'], result['type']])
+                result = {"access:": access_token}
 
-        return {"access:": access_token, "user:": result}
+        return result
