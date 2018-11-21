@@ -30,6 +30,7 @@ pluggy==0.8.0
 psycopg2-binary==2.7.6.1
 py==1.7.0
 py3dns==3.2.0
+pyaml==18.11.0
 pycodestyle==2.4.0
 pycparser==2.19
 PyJWT==1.6.4
@@ -37,6 +38,7 @@ pylint==2.1.1
 pytest==3.10.0
 pytest-cov==2.6.0
 pytz==2018.7
+PyYAML==3.13
 requests==2.20.0
 six==1.11.0
 typed-ast==1.1.0

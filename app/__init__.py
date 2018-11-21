@@ -17,7 +17,6 @@ def create_app(obj_config):
     with app.app_context():
         if obj_config == "app.config.TestingConfig":
             destroy_tables()
-        destroy_tables()
         create_tables()
     app.register_blueprint(VERSION1)
     app.register_blueprint(VERSION2)

@@ -103,7 +103,7 @@ class UserDeliveredOrders(Resource):
         result = orders_db.get_order_amount(userId, 'delivered', user_auth[0])
         if result == "Forbid":
             response = make_response(
-                jsonify({"ERROR": "Forbidden Access"}), 403)
+                jsonify({"ERROR": "Forbidden Access!! You do not view this delivery orders"}), 403)
         else:
             response = make_response(
                 jsonify({"Delivered orders for user " + str(userId): result}))
@@ -123,7 +123,7 @@ class UserOrdersInTransit(Resource):
         result = orders_db.get_order_amount(userId, 'in-transit', user_auth[0])
         if result == "Forbid":
             response = make_response(
-                jsonify({"ERROR": "Forbidden Access"}), 403)
+                jsonify({"ERROR": "Forbidden Access!! You do not have permission to Update this order"}), 403)
         else:
             response = make_response(
                 jsonify({"Orders in-transit for user " + str(userId): result}))
