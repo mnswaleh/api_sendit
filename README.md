@@ -1,5 +1,5 @@
 # apisendIT
-[![Maintainability](https://api.codeclimate.com/v2/badges/ef93ec6eaef2a2345a71/maintainability)](https://codeclimate.com/github/mnswaleh/api_sendit/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/ef93ec6eaef2a2345a71/maintainability)](https://codeclimate.com/github/mnswaleh/api_sendit/maintainability)
 [![Coverage Status](https://coveralls.io/repos/github/mnswaleh/api_sendit/badge.svg?branch=develop)](https://coveralls.io/github/mnswaleh/api_sendit?branch=develop)
 [![Build Status](https://travis-ci.org/mnswaleh/api_sendit.svg?branch=develop)](https://travis-ci.org/mnswaleh/api_sendit)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -78,9 +78,21 @@ on terminal: type
     "password": "Ab243677"
 }
 ```
-3. should receive response with code 201 with success message ie,
+3. should receive response with code 201 with success message with user details eg,
 ```
-"Signup successul!"
+{
+    "message": "Signup successul!",
+    "user": {
+        "email": "mnswaleh@gmail.com",
+        "firstname": "thomas",
+        "gender": "male",
+        "location": "kakamega",
+        "secondname": "Kalume",
+        "type": "user",
+        "user_id": 1,
+        "username": "tom"
+    }
+}
 ```
 
 ###### SIGNIN USER
@@ -92,21 +104,10 @@ on terminal: type
     "password": "Ab243677"
 }
 ```
-3. should receive response with code 201, user details and access tokeneg,
+3. should receive response with code 201 with access token eg,
 ```
 {
-    "access:": "eyJ0eXAiOiJKv2QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDI3MzgxMjgsIm5iZiI6MTU0MjczODEyOCwianRpIjoiYzJmMDRmMWUtODVkMi00OWE3LTgzMDItNDg4OGYxMzBmMGQ1IiwiZXhwIjoxNTQyNzM5MDI4LCJpZGVudGl0eSI6MSwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIn0.OX3d_0UbR0x05NWLYoiEXm38U_SrGiGocEPAjjLsERw",
-    "user:": {
-        "email": "mnswaleh@gmail.com",
-        "firstname": "thomas",
-        "gender": "male",
-        "location": "kakamega",
-        "password": "$2b$12$XAG/ExdpzJauxU464BzlRuxjcIydvW4FbtEDGoNOdblBPt8JVzzUu",
-        "secondname": "Kalume",
-        "type": "user",
-        "user_id": 1,
-        "username": "tom"
-    }
+    "access:": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDI4MDQ3NTksIm5iZiI6MTU0MjgwNDc1OSwianRpIjoiZDRjNTY3ZTItZDA3YS00ZWNhLThmOWEtN2IxNmM0MmMzMzI5IiwiZXhwIjoxNTQyODA1NjU5LCJpZGVudGl0eSI6WzEsInVzZXIiXSwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIn0.2WS6Q1LD0r6-5F0AFyKTS_bKgfo9SL8A8QZeyVDhCY4"
 }
 ```
 
@@ -125,9 +126,21 @@ on terminal: type
     "password": "Wbc346789"
 }
 ```
-3. should receive response with code 201 with success message ie,
+3. should receive response with code 201 with success message with user details eg,
 ```
-"Signup successul!"
+{
+    "message": "Signup successul!",
+    "user": {
+        "email": "mnswaleh@gmail.com",
+        "firstname": "sharon",
+        "gender": "female",
+        "location": "karatina",
+        "secondname": "mimo",
+        "type": "admin",
+        "user_id": 2,
+        "username": "sali"
+    }
+}
 ```
 
 ###### SIGNIN ADMIN
@@ -139,21 +152,10 @@ on terminal: type
     "password": "Ab243677"
 }
 ```
-3. should receive response with code 201, user details and access tokeneg,
+3. should receive response with code 201 with access token eg,
 ```
 {
-    "access:": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDI3Mzg2NzYsIm5iZiI6MTU0MjczODY3NiwianRpIjoiN2NlMDFmNTQtM2E5NC00YjVkLWE5YTItMjY4NjYyY2E1MjcyIiwiZXhwIjoxNTQyNzM5NTc2LCJpZGVudGl0eSI6MiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIn0.wETWX0ZNP2XeXBuhiudoW00yiHOmVM8fqdBv7eQSWuI",
-    "user:": {
-        "email": "mnswaleh@gmail.com",
-        "firstname": "sharon",
-        "gender": "female",
-        "location": "karatina",
-        "password": "$2b$12$0Z0vIDaledTDaNSghoe8X.lkCd4bKQIXL1.7luzLBNoo/9bWXfBcO",
-        "secondname": "mimo",
-        "type": "admin",
-        "user_id": 2,
-        "username": "sali"
-    }
+    "access:": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDI4MDQ3NTksIm5iZiI6MTU0MjgwNDc1OSwianRpIjoiZDRjNTY3ZTItZDA3YS00ZWNhLThmOWEtN2IxNmM0MmMzMzI5IiwiZXhwIjoxNTQyODA1NjU5LCJpZGVudGl0eSI6WzEsInVzZXIiXSwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIn0.2WS6Q1LD0r6-5F0AFyKTS_bKgfo9SL8A8QZeyVDhCY4"
 }
 ```
 

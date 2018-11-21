@@ -77,7 +77,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        self.assertIn('tom', str(result))
+        self.assertIn('access:', str(result))
 
     def test_create_order(self):
         """Test endpoint to create order"""
