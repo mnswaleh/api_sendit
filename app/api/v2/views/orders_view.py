@@ -17,7 +17,7 @@ class DeliveryOrders(Resource):
     def get(self):
         """Fetch all orders"""
         user_auth = get_jwt_identity()
-        result = self.orders_db.get_orders(user_auth)
+        result = self.orders_db.get_orders(user_auth[0])
         response = {}
         if result and "ERROR" in result[0]:
             response = make_response(jsonify(result[0]), 403)
@@ -40,7 +40,7 @@ class DeliveryOrders(Resource):
         if data_validation != "ok":
             response = make_response(jsonify({"Error": data_validation}), 400)
         else:
-            result = self.orders_db.create_order(data, user_auth)
+            result = self.orders_db.create_order(data, user_auth[0])
             if "ERROR" in result:
                 response = make_response(jsonify(result), 403)
             else:
@@ -71,7 +71,7 @@ class DeliveryOrder(Resource):
         orders_db = OrdersModel()
         response = {}
         user_auth = get_jwt_identity()
-        result = orders_db.get_order(parcelId, user_auth)
+        result = orders_db.get_order(parcelId, user_auth[0])
 
         if "message" in result:
             response = make_response(jsonify(result), 404)
@@ -95,7 +95,7 @@ class DeliveryOrderUpdate(Resource):
         user_auth = get_jwt_identity()
         response = {}
         result = self.orders_db.update_order(
-            parcelId, 'cancel', 'canceled', user_auth)
+            parcelId, 'cancel', 'canceled', user_auth[0])
 
         if "ERROR" in result:
             response = make_response(jsonify(result), 403)
@@ -125,7 +125,7 @@ class DeliveryOrderDeliveryUpdate(Resource):
             response = make_response(jsonify({"Error": data_validation}), 400)
         else:
             result = orders_db.update_order(
-                parcelId, 'delivery', data['delivery location'], user_auth)
+                parcelId, 'delivery', data['delivery location'], user_auth[0])
             if "ERROR" in result:
                 response = make_response(jsonify(result), 403)
             elif "message" in result:
@@ -154,7 +154,7 @@ class DeliveryOrderLocation(Resource):
             response = make_response(jsonify({"Error": data_validation}), 400)
         else:
             result = orders_db.update_order(
-                parcelId, 'location', data['current location'], user_auth)
+                parcelId, 'location', data['current location'], user_auth[0])
             if "ERROR" in result:
                 response = make_response(jsonify(result), 403)
             elif "message" in result:
@@ -182,7 +182,7 @@ class DeliveryOrderStatus(Resource):
             response = make_response(jsonify({"Error": data_validation}), 400)
         else:
             result = orders_db.update_order(
-                parcelId, 'status', data['status'], user_auth)
+                parcelId, 'status', data['status'], user_auth[0])
             if "ERROR" in result:
                 response = make_response(jsonify(result), 403)
             elif "message" in result:

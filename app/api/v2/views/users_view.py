@@ -82,7 +82,7 @@ class UserOrders(Resource):
         """ Fetch all delivery orders created by a specific user"""
         orders_db = OrdersModel()
         user_auth = get_jwt_identity()
-        result = orders_db.get_user_orders(userId, user_auth)
+        result = orders_db.get_user_orders(userId, user_auth[0])
         if result and "ERROR" in result[0]:
             response = make_response(jsonify(result[0]), 403)
         else:
@@ -100,7 +100,7 @@ class UserDeliveredOrders(Resource):
         orders_db = OrdersModel()
         response = {}
         user_auth = get_jwt_identity()
-        result = orders_db.get_order_amount(userId, 'delivered', user_auth)
+        result = orders_db.get_order_amount(userId, 'delivered', user_auth[0])
         if result == "Forbid":
             response = make_response(
                 jsonify({"ERROR": "Forbidden Access"}), 403)
@@ -120,7 +120,7 @@ class UserOrdersInTransit(Resource):
         orders_db = OrdersModel()
         response = {}
         user_auth = get_jwt_identity()
-        result = orders_db.get_order_amount(userId, 'in-transit', user_auth)
+        result = orders_db.get_order_amount(userId, 'in-transit', user_auth[0])
         if result == "Forbid":
             response = make_response(
                 jsonify({"ERROR": "Forbidden Access"}), 403)

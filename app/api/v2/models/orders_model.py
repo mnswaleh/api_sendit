@@ -2,7 +2,6 @@
 import re
 from app.db_config import init_db
 from app.api.v2.models.users_model import UsersModel
-from app.api.v2.models.users_model import AuthenticateUser
 from validate_email import validate_email
 
 class OrdersModel():
@@ -11,7 +10,6 @@ class OrdersModel():
     def __init__(self):
         self.order_db = init_db()
         self.user_db = UsersModel()
-        self.user_auth = AuthenticateUser()
 
     def create_order(self, data, user_auth):
         """Create order and append it to orders"""
@@ -86,7 +84,7 @@ class OrdersModel():
 
         return result
 
-    def update_order(self, order_id, update_col, col_val, user_id):
+    def update_order(self, order_id, update_col, col_val, user_auth):
         """Cancel delivery order"""
         result = {}
         update_column = ""
@@ -94,7 +92,7 @@ class OrdersModel():
 
         if "message" in if_exist:
             result = {"message": "order unknown"}
-        elif self.user_auth.auth_change(user_id, update_col, if_exist['sender']):
+        elif if_exist['sender'] == user_auth[0] and user_auth[]:
             if update_col == 'status':
                 update_column = "status='{}'".format(col_val)
             elif update_col == 'cancel':
