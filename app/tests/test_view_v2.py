@@ -26,7 +26,7 @@ class TestDeliveryOrders(unittest.TestCase):
             "username": "tito",
             "first_name": "titaus",
             "second_name": "mzalendo",
-            "email": "mnswaleh@gmail.com",
+            "email": "swaleh2031@gmail.com",
             "gender": "male",
             "location": "narok",
             "type": "admin",
@@ -77,7 +77,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        self.assertIn('access:', str(result))
+        self.assertIn('access', str(result))
 
     def test_create_order(self):
         """Test endpoint to create order"""
@@ -90,7 +90,7 @@ class TestDeliveryOrders(unittest.TestCase):
 
         result = json.loads(response.data)
 
-        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
+        req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
         response = self.app.post(
             '/api/v2/parcels', data=json.dumps(self.order_data), headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 201)
@@ -121,7 +121,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
+        req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
         response = self.app.get(
             '/api/v2/parcels', headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 200)
@@ -130,7 +130,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertIn('order_no', str(result))
 
     def test_get_specific_order(self):
-        """Test endpoint to fetch a spoecific order"""
+        """Test endpoint to fetch a specific order"""
         self.test_create_order()
         user_login = {
             "username": self.user_data['username'], "password": self.user_data['password']}
@@ -139,7 +139,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
+        req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
         response = self.app.get(
             '/api/v2/parcels/1', headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 200)
@@ -157,7 +157,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
+        req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
         response = self.app.get(
             '/api/v2/users/1/parcels', headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 200)
@@ -175,7 +175,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
+        req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
         response = self.app.put(
             '/api/v2/parcels/1/cancel', headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 200)
@@ -193,7 +193,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
+        req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
         response = self.app.put(
             '/api/v2/parcels/1/presentLocation', headers=req_header, data=json.dumps(self.edit_data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
@@ -211,7 +211,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
+        req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
         response = self.app.put(
             '/api/v2/parcels/1/status', headers=req_header, data=json.dumps(self.edit_data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
@@ -229,7 +229,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
+        req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
         response = self.app.put(
             '/api/v2/parcels/1/destination', headers=req_header, data=json.dumps(self.edit_data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
@@ -248,7 +248,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
+        req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
         response = self.app.get(
             '/api/v2/users/1/delivered', headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 200)
@@ -267,7 +267,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        req_header = {'Authorization': 'Bearer {}'.format(result['access:'])}
+        req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
         response = self.app.get(
             '/api/v2/users/1/in-transit', headers=req_header, content_type='application/json')
         self.assertEqual(response.status_code, 200)

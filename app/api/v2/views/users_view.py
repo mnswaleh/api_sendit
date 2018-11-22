@@ -12,7 +12,7 @@ class Users(Resource):
 
     def __init__(self):
         self.orders_db = UsersModel()
-        self.result = reqparse.RequestParser()
+        self.result = reqparse.RequestParser(trim=True)
 
     def post(self):
         """Create User"""
@@ -30,21 +30,21 @@ class Users(Resource):
     def pars_data(self):
         """Parse user data"""
         self.result.add_argument(
-            'username', type=str, help="username is required to be a string", required=True, location='json')
+            'username', type=str, help="username is required and should be a string", required=True, location='json')
         self.result.add_argument(
-            'first_name', type=str, help="first name is required to be a string", required=True, location='json')
+            'first_name', type=str, help="first name is required and should be a string", required=True, location='json')
         self.result.add_argument(
-            'second_name', type=str, help="second name is required to be a string", required=True, location='json')
+            'second_name', type=str, help="second name is required and should be a string", required=True, location='json')
         self.result.add_argument(
-            'email', type=str, help="email", required=True, location='json')
+            'email', type=str, help="email is required", required=True, location='json')
         self.result.add_argument(
-            'gender', type=str, help="gender is required to be a string", required=True, location='json')
+            'gender', type=str, help="gender is required and should be a string", required=True, location='json')
         self.result.add_argument(
-            'location', type=str, help="location is required to be a string", required=True, location='json')
+            'location', type=str, help="location is required and should be a string", required=True, location='json')
         self.result.add_argument(
-            'type', type=str, help="type is required to be a string", required=True, location='json')
+            'type', type=str, help="type is required and should be a string", required=True, location='json')
         self.result.add_argument(
-            'password', type=str, help="password is required to be a string", required=True, location='json')
+            'password', type=str, help="password is required and should be a string", required=True, location='json')
 
         return self.result.parse_args()
 
@@ -68,11 +68,10 @@ class UserSignin(Resource):
         data_validation = inputs_validate.confirm_input()
         if data_validation != "ok":
             return make_response(jsonify({"Error": data_validation}), 400)
-        else:
-            result = self.orders_db.user_login(
-                data['username'], data['password'])
 
-            return make_response(jsonify(result), 200)
+        result = self.orders_db.user_login(data['username'], data['password'])
+
+        return make_response(jsonify(result), 200)
 
 
 class UserOrders(Resource):
