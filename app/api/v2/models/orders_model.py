@@ -1,8 +1,9 @@
 """Orders Models"""
 import re
+from validate_email import validate_email
 from app.db_config import init_db
 from app.api.v2.models.users_model import UsersModel
-from validate_email import validate_email
+
 
 class OrdersModel():
     """Create Orders Model"""
@@ -15,11 +16,11 @@ class OrdersModel():
         """Create order and append it to orders"""
         response = {}
         order = {
-            "pick_up_location": data['pick up location'],
-            "delivery_location": data['delivery location'],
-            "current_location": data['pick up location'],
-            "weight": data['weight'],
-            "price": data['price'],
+            "pick_up_location": data['pick up location'].lower(),
+            "delivery_location": data['delivery location'].lower(),
+            "current_location": data['pick up location'].lower(),
+            "weight": float(data['weight']),
+            "price": float(data['price']),
             "status": "pending",
             "sender": user_auth
         }
@@ -33,13 +34,15 @@ class OrdersModel():
 
             response = order
         else:
-            response = {"ERROR": "Forbidden access!! You do not have permission to create order"}
+            response = {
+                "ERROR": "Forbidden access!! You do not have permission to create order"}
 
         return response
 
     def get_orders(self, user_auth):
         """Get orders in database"""
-        response = []
+        response = [
+            {"ERROR": "Forbidden access!! You do not have permission to view this orders"}]
 
         if user_auth == "admin":
             query = "SELECT * FROM orders"
@@ -47,14 +50,7 @@ class OrdersModel():
             curr.execute(query)
             data = curr.fetchall()
 
-            for row in data:
-                item_resp = {}
-                for i, key in enumerate(curr.description):
-                    item_resp[key[0]] = row[i]
-
-                response.append(item_resp)
-        else:
-            response = [{"ERROR": "Forbidden access!! You do not have permission to view this orders"}]
+            response = self.objectify_data(data, curr)
 
         return response
 
@@ -77,41 +73,34 @@ class OrdersModel():
             if result['sender'] == user_auth or user_details['type'] == 'admin':
                 pass
             else:
-                result = {"ERROR": "Forbidden access!! You do not have permission to view this order"}
+                result = {
+                    "ERROR": "Forbidden access!! You do not have permission to view this order"}
         else:
             for i, key in enumerate(curr.description):
                 result[key[0]] = data[i]
 
         return result
 
-    def update_order(self, order_id, update_col, col_val, user_auth):
+    def update_order(self, order_id, update_col, col_val):
         """Cancel delivery order"""
         result = {}
         update_column = ""
-        if_exist = self.get_order(order_id)
-
-        if "message" in if_exist:
-            result = {"message": "order unknown"}
-        elif if_exist['sender'] == user_auth[0] or user_auth[1] == "admin":
-            if update_col == 'status':
-                update_column = "status='{}'".format(col_val)
-            elif update_col == 'cancel':
-                update_column = "status='{}'".format(col_val)
-            elif update_col == 'location':
-                update_column = "current_location='{}'".format(col_val)
-            else:
-                update_column = "destination='{}'".format(col_val)
-
-            query = "UPDATE orders SET {} WHERE order_no={}".format(
-                update_column, order_id)
-            curr = self.order_db.cursor()
-            curr.execute(query)
-            self.order_db.commit()
-
-            result = self.get_order(order_id)
+        if update_col == 'status':
+            update_column = "status='{}'".format(col_val)
+        elif update_col == 'cancel':
+            update_column = "status='{}'".format(col_val)
+        elif update_col == 'location':
+            update_column = "current_location='{}'".format(col_val)
         else:
-            result = {"ERROR": "Forbidden access!! You do not have permission to Update this order"}
+            update_column = "destination='{}'".format(col_val)
 
+        query = "UPDATE orders SET {} WHERE order_no={}".format(
+            update_column, order_id)
+        curr = self.order_db.cursor()
+        curr.execute(query)
+        self.order_db.commit()
+
+        result = self.get_order(order_id)
         return result
 
     def get_user_orders(self, user_id, auth_user):
@@ -125,14 +114,10 @@ class OrdersModel():
             curr.execute(query)
 
             data = curr.fetchall()
-            for row in data:
-                item_resp = {}
-                for i, key in enumerate(curr.description):
-                    item_resp[key[0]] = row[i]
-
-                response.append(item_resp)
+            response = self.objectify_data(data, curr)
         else:
-            response = [{"ERROR": "Forbidden access!! You do not have permission to view this orders"}]
+            response = [
+                {"ERROR": "Forbidden access!! You do not have permission to view this orders"}]
 
         return response
 
@@ -145,7 +130,7 @@ class OrdersModel():
                 db_query = "SELECT COUNT(*) FROM orders WHERE status='delivered' and sender={}".format(
                     user_id)
             else:
-                db_query = "SELECT COUNT(*) FROM orders WHERE status='in-transit' and sender={}".format(
+                db_query = "SELECT COUNT(*) FROM orders WHERE status='in transit' and sender={}".format(
                     user_id)
 
             curr = self.order_db.cursor()
@@ -158,8 +143,50 @@ class OrdersModel():
         else:
             return "Forbid"
 
-    def final_response(self, result):
-        pass
+    def objectify_data(self, data, curr):
+        """Create objects out of tuples"""
+        response = []
+        for row in data:
+            item_resp = {}
+            for i, key in enumerate(curr.description):
+                item_resp[key[0]] = row[i]
+
+            response.append(item_resp)
+        return response
+
+    def make_user_response(self, parcel_id, update_type, user_data, user_req):
+        response = [
+            {"ERROR": "Forbidden access!! You do not have permission to make this change"}, 403]
+        result = {}
+        if_exist = self.get_order(parcel_id)
+        if "message" in if_exist:
+            response = [{"message": "This parcel order doesn't exist"}, 404]
+        elif if_exist['sender'] == user_req[0]:
+            if update_type == "cancel" or update_type == "delivery":
+                if if_exist['status'] == "canceled":
+                    response = [
+                        {"message": "This Order is already canceled"}, 403]
+                elif if_exist['status'] == "delivered":
+                    response = [
+                        {"message": "This Order is already delivered"}, 403]
+                else:
+                    result = self.update_order(
+                        parcel_id, update_type, user_data)
+                    response = [result, 200]
+        elif user_req[1] == "admin":
+            if update_type == "status" or update_type == "location":
+                if update_type == "location" and if_exist['destination'] == user_data:
+                    response = [
+                        {"message": "This Order location is already at " + user_data}, 403]
+                if update_type == "status" and if_exist['status'] == user_data:
+                    response = [
+                        {"message": "This Order already " + user_data}, 403]
+                else:
+                    result = self.update_order(
+                        parcel_id, update_type, user_data)
+                    response = [result, 200]
+
+        return response
 
 
 class ValidateInputs():
@@ -181,26 +208,31 @@ class ValidateInputs():
             elif self.data_for == "update_status":
                 message = self.update_status_inputs()
             elif self.data_for == "change_location":
-                message = self.update_location_inputs()
+                message = self.validate_name(
+                    self.user_input['current location'])
             elif self.data_for == "signin":
                 message = self.user_signin_inputs()
             else:
-                message = self.change_delivery_inputs()
+                message = self.validate_name(
+                    self.user_input['delivery location'])
 
         return message
 
     def create_user_inputs(self):
         """confirm inputs for creating user"""
-        if not re.match("^[a-zA-Z]{1}[a-zA-Z0-9]{2,7}$", self.user_input['username']):
-            message = "username should start with a letter and be between 3-10 alphanumeric characters"
-        elif not re.match("^[a-zA-Z]{3,20}$", self.user_input['first_name']):
-            message = "First name should be between 3-20 alphabetical characters"
-        elif not re.match("^[a-zA-Z]{3,20}$", self.user_input['second_name']):
-            message = "Second name should be between 3-20 alphabetic characters"
+        if self.validate_username(self.user_input['username']) != "ok":
+            message = self.validate_username(self.user_input['username'])
+        elif self.validate_name(self.user_input['first_name']) != "ok":
+            message = "First name " + \
+                self.validate_name(self.user_input['first_name'])
+        elif self.validate_name(self.user_input['second_name']) != "ok":
+            message = "Second name " + \
+                self.validate_name(self.user_input['second_name'])
         elif not validate_email(self.user_input['email']):
             message = "Invalid email"
-        elif not re.match("^[a-zA-Z]{3,20}$", self.user_input['location']):
-            message = "Location should be between 3-20 alphabeticcharacters"
+        elif self.validate_name(self.user_input['location']) != "ok":
+            message = "Location " + \
+                self.validate_name(self.user_input['location'])
         elif self.user_input['gender'] != "male" and self.user_input['gender'] != "female":
             message = "gender should be 'male' or 'female'"
         elif self.user_input['type'] != "admin" and self.user_input['type'] != "user":
@@ -208,7 +240,7 @@ class ValidateInputs():
         elif not re.match("^[a-zA-Z0-9]{6,20}$", self.user_input['password']):
             message = "password should have capital letter,small letter, number and be between 6-10 alphanumeric characters"
         elif self.user_db.get_username(self.user_input['username']) != "ok":
-            message = "username alredy exists!!"
+            message = "username already exists!!"
         else:
             message = "ok"
 
@@ -216,10 +248,10 @@ class ValidateInputs():
 
     def user_signin_inputs(self):
         """confirm inputs for user signin"""
-        if not re.match("^[a-zA-Z]{1}[a-zA-Z0-9]{2,7}$", self.user_input['username']):
-            message = "username missing"
+        if not re.match("^[a-zA-Z]{1}[a-zA-Z0-9]{2,10}$", self.user_input['username']):
+            message = "Invalid username or password"
         elif not re.match("^[a-zA-Z0-9]{6,20}$", self.user_input['password']):
-            message = "password missing"
+            message = "Invalid username or password"
         else:
             message = "ok"
 
@@ -227,32 +259,16 @@ class ValidateInputs():
 
     def create_order_inputs(self):
         """confirm inputs for creating order"""
-        if not re.match("^[a-zA-Z]{3,20}$", self.user_input['pick up location']):
-            message = "Pick up location should be between 3-20 alphabetic characters"
-        elif not re.match("^[a-zA-Z]{3,20}$", self.user_input['delivery location']):
-            message = "Delivery location should be between 3-20 alphabetic characters"
-        elif not isinstance(self.user_input['weight'], (int, float)):
+        if self.validate_name(self.user_input['pick up location']) != "ok":
+            message = "Pick up location " + \
+                self.validate_name(self.user_input['pick up location'])
+        elif self.validate_name(self.user_input['delivery location']) != "ok":
+            message = "Delivery location " + \
+                self.validate_name(self.user_input['delivery location'])
+        elif not self.user_input['weight'].replace('.', '', 1).isdigit():
             message = "Weight should be decimal number"
-        elif not isinstance(self.user_input['weight'], (int, float)):
+        elif not self.user_input['weight'].replace('.', '', 1).isdigit():
             message = "price should be decimal number"
-        else:
-            message = "ok"
-
-        return message
-
-    def change_delivery_inputs(self):
-        """confirm inputs for changing delivery location"""
-        if not re.match("^[a-zA-Z]{3,20}$", self.user_input['delivery location']):
-            message = "Delivery location should be between 3-20 alphabetic characters"
-        else:
-            message = "ok"
-
-        return message
-
-    def update_location_inputs(self):
-        """confirm inputs for changing current location"""
-        if not re.match("^[a-zA-Z]{3,20}$", self.user_input['current location']):
-            message = "current location should be between 3-20 alphabetic characters"
         else:
             message = "ok"
 
@@ -264,7 +280,33 @@ class ValidateInputs():
         if self.user_input['status'] != "pending" and self.user_input['status'] != "in transit":
             if self.user_input['status'] != "delivered" and self.user_input['status'] != "canceled":
                 message = "status should be 'pending', 'in transit', 'delivered' or canceled"
-            
 
         return message
-        
+
+    def validate_username(self, user_name):
+        message = "ok"
+        if not user_name.strip():
+            message = "username is missing"
+        elif " " in user_name:
+            message = "should not have spaces"
+        elif not user_name[0].isalpha():
+            message = "username should start with a letter"
+        elif not re.match("[a-zA-Z0-9]", user_name):
+            message = "username should be alphanumerical"
+        elif len(user_name) < 3 and len(user_name) > 10:
+            message = "username should be between 3-10 words"
+
+        return message
+
+    def validate_name(self, data_name):
+        message = "ok"
+        if not data_name.strip():
+            message = "is missing"
+        elif " " in data_name:
+            message = "should not have spaces"
+        elif not data_name.isalpha():
+            message = "should be alphabetical letter"
+        elif len(data_name) < 3 and len(data_name) > 20:
+            message = "should be between 3-20 words"
+
+        return message

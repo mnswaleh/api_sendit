@@ -5,7 +5,7 @@ import psycopg2
 
 def connection(url):
     """open database connection"""
-    con = psycopg2.connect(current_app.config['DATABASE_URL'])
+    con = psycopg2.connect(url)
     return con
 
 

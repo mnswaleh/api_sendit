@@ -15,12 +15,12 @@ class UsersModel():
         user_pass = flask_bcrypt.generate_password_hash(
             data['password']).decode('utf-8')
         user = {
-            "username": data['username'],
-            "first_name": data['first_name'],
-            "second_name": data['second_name'],
+            "username": data['username'].lower(),
+            "first_name": data['first_name'].lower(),
+            "second_name": data['second_name'].lower(),
             "email": data['email'],
             "gender": data['gender'],
-            "location": data['location'],
+            "location": data['location'].lower(),
             "password": user_pass,
             "type": data['type']
         }
@@ -31,10 +31,10 @@ class UsersModel():
         self.user_db.commit()
         result = self.get_username(data['username'])
         if result == "ok":
-            return "Signup Failed!"
-        else:
-            del result["password"]
-            return {"message": "Signup successul!", "user": result}
+            return {"message": "Signup Failed!"}
+
+        del result["password"]
+        return {"message": "Signup successul!", "user": result}
 
     def get_user(self, user_id):
         """Get a specific user from the database"""
@@ -93,6 +93,7 @@ class UsersModel():
                 result = user_data
                 access_token = create_access_token(
                     identity=[result['user_id'], result['type']])
-                result = {"access:": access_token}
+                result = {"Message": "Login Successful!",
+                          "access": access_token}
 
         return result

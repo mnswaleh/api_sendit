@@ -371,4 +371,4 @@ on terminal: type
 ```
 
 ## on heroku
-reapet the postman tests above replacing server url http://127.0.0.1:5000 with https://apisendit.herokuapp.com/
+reapet the postman tests above replacing server url http://127.0.0.1:5000 with https://api-sendit.herokuapp.com/
