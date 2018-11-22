@@ -241,6 +241,8 @@ class ValidateInputs():
             message = "password should have capital letter,small letter, number and be between 6-10 alphanumeric characters"
         elif self.user_db.get_username(self.user_input['username']) != "ok":
             message = "username already exists!!"
+        elif self.user_db.get_email(self.user_input['email']) != "ok":
+            message = "email is already registered!!"
         else:
             message = "ok"
 
@@ -293,7 +295,7 @@ class ValidateInputs():
             message = "username should start with a letter"
         elif not re.match("[a-zA-Z0-9]", user_name):
             message = "username should be alphanumerical"
-        elif len(user_name) < 3 and len(user_name) > 10:
+        elif len(user_name) < 3 or len(user_name) > 10:
             message = "username should be between 3-10 words"
 
         return message
@@ -306,7 +308,7 @@ class ValidateInputs():
             message = "should not have spaces"
         elif not data_name.isalpha():
             message = "should be alphabetical letter"
-        elif len(data_name) < 3 and len(data_name) > 20:
+        elif len(data_name) < 3 or len(data_name) > 20:
             message = "should be between 3-20 words"
 
         return message

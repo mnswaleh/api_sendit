@@ -26,7 +26,7 @@ class TestDeliveryOrders(unittest.TestCase):
             "username": "tito",
             "first_name": "titaus",
             "second_name": "mzalendo",
-            "email": "mnswaleh@gmail.com",
+            "email": "swaleh2031@gmail.com",
             "gender": "male",
             "location": "narok",
             "type": "admin",

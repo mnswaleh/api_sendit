@@ -72,6 +72,20 @@ class UsersModel():
 
         return result
 
+    def get_email(self, user_email):
+        """Get a specific user from the database using email"""
+        query = "SELECT * FROM users WHERE email='{}'".format(user_email)
+
+        curr = self.user_db.cursor()
+        curr.execute(query)
+
+        data = curr.fetchone()
+
+        if data:
+            return "data"
+        
+        return "ok"
+
     def user_login(self, username, password):
         """User login method"""
         user_data = {}
