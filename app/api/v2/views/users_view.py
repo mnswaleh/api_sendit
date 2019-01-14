@@ -79,12 +79,33 @@ class UserSignin(Resource):
 
         return response
 
+
 class UserLogout(Resource):
     """Signout a loged user"""
     @jwt_required
     def put(self):
         """Method to signout user"""
         return make_response(jsonify({"message": "successful logout"}), 200)
+
+
+class UserProfile(Resource):
+    """Display user profile"""
+    @jwt_required
+    def get(self, userId):
+        """ Fetch all user details"""
+        users_db = UsersModel()
+        response = {}
+        user_auth = get_jwt_identity()
+        result = users_db.get_user(userId, user_auth)
+
+        if "message" in result:
+            response = make_response(jsonify(result), 404)
+        elif "ERROR" in result:
+            response = make_response(jsonify(result), 403)
+        else:
+            response = make_response(jsonify(result), 200)
+
+        return response
 
 
 class UserOrders(Resource):
@@ -118,7 +139,7 @@ class UserDeliveredOrders(Resource):
                 jsonify({"ERROR": "Forbidden Access!! You do not view this delivery orders"}), 403)
         else:
             response = make_response(
-                jsonify({"Delivered orders for user " + str(userId): result}))
+                jsonify({"delivered": result}))
 
         return response
 
@@ -138,6 +159,6 @@ class UserOrdersInTransit(Resource):
                 jsonify({"ERROR": "Forbidden Access!! You do not have permission to Update this order"}), 403)
         else:
             response = make_response(
-                jsonify({"Orders in-transit for user " + str(userId): result}))
+                jsonify({"in_transit": result}))
 
         return response

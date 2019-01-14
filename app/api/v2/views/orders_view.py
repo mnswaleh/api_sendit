@@ -23,7 +23,7 @@ class DeliveryOrders(Resource):
             response = make_response(jsonify(result[0]), 403)
         else:
             response = make_response(
-                jsonify({"Title": "Delivery orders", "orders": result}))
+                jsonify({"Title": "Delivery orders", "orders": result}), 200)
 
         return response
 
@@ -77,7 +77,7 @@ class DeliveryOrder(Resource):
         elif "ERROR" in result:
             response = make_response(jsonify(result), 403)
         else:
-            response = make_response(jsonify(result))
+            response = make_response(jsonify(result), 200)
 
         return response
 

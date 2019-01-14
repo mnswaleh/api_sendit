@@ -36,7 +36,7 @@ class UsersModel():
         del result["password"]
         return {"message": "Signup successul!", "user": result}
 
-    def get_user(self, user_id):
+    def get_user(self, user_id, user_auth=[]):
         """Get a specific user from the database"""
         result = {}
         query = "SELECT * FROM users WHERE user_id={}".format(user_id)
@@ -48,9 +48,13 @@ class UsersModel():
 
         if not data:
             result = {"message": "user unknown"}
+        elif user_auth and (user_id != user_auth[0] and user_auth[1] != "admin"):
+            result = {
+                "ERROR": "Forbidden access!! You do not have permission to view this  user details"}
         else:
             for i, key in enumerate(curr.description):
                 result[key[0]] = data[i]
+            del result["password"]
 
         return result
 
