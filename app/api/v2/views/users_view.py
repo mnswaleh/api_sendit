@@ -149,7 +149,7 @@ class UserOrdersInTransit(Resource):
 
     @jwt_required
     def get(self, userId):
-        """Fetch delivery orders in transit for a specific user"""
+        """Fetch number of delivery orders in transit for a specific user"""
         orders_db = OrdersModel()
         response = {}
         user_auth = get_jwt_identity()
