@@ -83,7 +83,7 @@ class UsersModel():
 
         if data:
             return "data"
-        
+
         return "ok"
 
     def user_login(self, username, password):
@@ -105,9 +105,10 @@ class UsersModel():
 
             if flask_bcrypt.check_password_hash(user_data['password'], password):
                 result = user_data
-                access_token = create_access_token(
-                    identity=[result['user_id'], result['type']])
+                user_details = [result['user_id'], result['type']]
+                access_token = create_access_token(identity=user_details)
                 result = {"Message": "Login Successful!",
+                          "user": user_details,
                           "access": access_token}
 
         return result

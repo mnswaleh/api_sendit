@@ -2,7 +2,7 @@
 
 from flask import make_response, jsonify
 from flask_restful import Resource, reqparse
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_raw_jwt
 from app.api.v2.models.users_model import UsersModel
 from app.api.v2.models.orders_model import OrdersModel, ValidateInputs
 
@@ -21,7 +21,7 @@ class Users(Resource):
         inputs_validate = ValidateInputs(data, 'create_user')
         data_validation = inputs_validate.confirm_input()
         if data_validation != "ok":
-            result = make_response(jsonify({"Error": data_validation}), 400)
+            result = make_response(jsonify({"ERROR": data_validation}), 400)
         else:
             res = self.orders_db.create_user(data)
             result = make_response(jsonify(res), 201)
@@ -30,21 +30,21 @@ class Users(Resource):
     def pars_data(self):
         """Parse user data"""
         self.result.add_argument(
-            'username', type=str, help="username is required and should be a string", required=True, location='json')
+            'username', type=str, help="username is required", required=True, location='json')
         self.result.add_argument(
-            'first_name', type=str, help="first name is required and should be a string", required=True, location='json')
+            'first_name', type=str, help="first name is required", required=True, location='json')
         self.result.add_argument(
-            'second_name', type=str, help="second name is required and should be a string", required=True, location='json')
+            'second_name', type=str, help="second name is required", required=True, location='json')
         self.result.add_argument(
             'email', type=str, help="email is required", required=True, location='json')
         self.result.add_argument(
-            'gender', type=str, help="gender is required and should be a string", required=True, location='json')
+            'gender', type=str, help="gender is required", required=True, location='json')
         self.result.add_argument(
-            'location', type=str, help="location is required and should be a string", required=True, location='json')
+            'location', type=str, help="location is required", required=True, location='json')
         self.result.add_argument(
-            'type', type=str, help="type is required and should be a string", required=True, location='json')
+            'type', type=str, help="type is required", required=True, location='json')
         self.result.add_argument(
-            'password', type=str, help="password is required and should be a string", required=True, location='json')
+            'password', type=str, help="password is required", required=True, location='json')
 
         return self.result.parse_args()
 
@@ -53,25 +53,40 @@ class UserSignin(Resource):
     """Create users class to signin a user"""
 
     def __init__(self):
-        self.orders_db = UsersModel()
+        self.users_db = UsersModel()
 
     def post(self):
         """Create signin user"""
+        response = {}
         result = reqparse.RequestParser()
 
         result.add_argument(
-            'username', type=str, help="invalid useraname or password", required=True, location='json')
+            'username', type=str, help="invalid useraname or password", required=True)
         result.add_argument(
-            'password', type=str, help="invalid useraname or password", required=True, location='json')
+            'password', type=str, help="invalid useraname or password", required=True)
         data = result.parse_args()
         inputs_validate = ValidateInputs(data, 'signin')
         data_validation = inputs_validate.confirm_input()
         if data_validation != "ok":
-            return make_response(jsonify({"Error": data_validation}), 400)
+            response = make_response(jsonify({"ERROR": data_validation}), 400)
+        else:
+            login_result = self.users_db.user_login(
+                data['username'], data['password'])
+            if "ERROR" in login_result:
+                response = make_response(jsonify(login_result), 400)
+            else:
+                response = make_response(jsonify(login_result), 200)
 
-        result = self.orders_db.user_login(data['username'], data['password'])
+        return response
 
-        return make_response(jsonify(result), 200)
+class UserLogout(Resource):
+    """Signout a loged user"""
+    @jwt_required
+    def logout(self):
+        """Method to signout user"""
+        
+        jti = get_raw_jwt()['jti']
+        return jsonify({"msg": "Successfully logged out"}), 200
 
 
 class UserOrders(Resource):
@@ -86,7 +101,7 @@ class UserOrders(Resource):
             response = make_response(jsonify(result[0]), 403)
         else:
             response = make_response(jsonify(
-                {"Title": "Delivery orders by user " + str(userId), "Delivery orders list": result}))
+                {"Title": "Delivery orders by user " + str(userId), "orders": result}))
 
         return response
 

@@ -23,7 +23,7 @@ class DeliveryOrders(Resource):
             response = make_response(jsonify(result[0]), 403)
         else:
             response = make_response(
-                jsonify({"Title": "Delivery orders", "Delivery orders list": result}))
+                jsonify({"Title": "Delivery orders", "orders": result}))
 
         return response
 
@@ -49,14 +49,14 @@ class DeliveryOrders(Resource):
 
     def pars_data(self):
         """Parse user data"""
-        self.result.add_argument('pick up location', type=str,
-                                 help="pick up location' is required to be a string", required=True)
-        self.result.add_argument('delivery location', type=str,
-                                 help="delivery location' is required to be a string", required=True)
+        self.result.add_argument('pick_up_location', type=str,
+                                 help="pick up location is required", required=True)
+        self.result.add_argument('delivery_location', type=str,
+                                 help="delivery location is required", required=True)
         self.result.add_argument(
-            'weight', help="weight is missing", required=True)
+            'weight', help="weight is required", required=True)
         self.result.add_argument(
-            'price', help="price is missing", required=True)
+            'price', help="price is required", required=True)
 
         return self.result.parse_args()
 
@@ -110,7 +110,7 @@ class DeliveryOrderDeliveryUpdate(Resource):
         orders_db = OrdersModel()
         result = reqparse.RequestParser()
         response = {}
-        result.add_argument('delivery location', type=str,
+        result.add_argument('delivery_location', type=str,
                             help="delivery location is required", required=True)
         data = result.parse_args()
         inputs_validate = ValidateInputs(data, 'change_delivery')
@@ -120,7 +120,7 @@ class DeliveryOrderDeliveryUpdate(Resource):
                 jsonify({"Error": "Delivery location" + data_validation}), 400)
         else:
             result = orders_db.make_user_response(
-                parcelId, 'delivery', data['delivery location'], user_auth)
+                parcelId, 'delivery', data['delivery_location'], user_auth)
             response = make_response(jsonify(result[0]), result[1])
         return response
 
@@ -134,7 +134,7 @@ class DeliveryOrderLocation(Resource):
         orders_db = OrdersModel()
         result = reqparse.RequestParser()
         response = {}
-        result.add_argument('current location', type=str,
+        result.add_argument('current_location', type=str,
                             help="current location is required", required=True)
         data = result.parse_args()
         inputs_validate = ValidateInputs(data, 'change_location')
@@ -144,7 +144,7 @@ class DeliveryOrderLocation(Resource):
                 jsonify({"Error": "Current location" + data_validation}), 400)
         else:
             result = orders_db.make_user_response(
-                parcelId, 'location', data['current location'], user_auth)
+                parcelId, 'location', data['current_location'], user_auth)
             response = make_response(jsonify(result[0]), result[1])
         return response
 
@@ -159,7 +159,7 @@ class DeliveryOrderStatus(Resource):
         result = reqparse.RequestParser()
         response = {}
         result.add_argument(
-            'status', type=str, help="status' is required to be a string", required=True)
+            'status', type=str, help="status' is required", required=True)
         data = result.parse_args()
         inputs_validate = ValidateInputs(data, 'update_status')
         data_validation = inputs_validate.confirm_input()

@@ -5,7 +5,7 @@ from flask import Blueprint
 from app.api.v2.views.orders_view import (DeliveryOrders, DeliveryOrder, DeliveryOrderUpdate,
                                           DeliveryOrderDeliveryUpdate, DeliveryOrderStatus, DeliveryOrderLocation)
 from app.api.v2.views.users_view import (
-    UserOrders, UserDeliveredOrders, UserOrdersInTransit, Users, UserSignin)
+    UserOrders, UserDeliveredOrders, UserOrdersInTransit, Users, UserSignin, UserLogout)
 
 VERSION2 = Blueprint('sendit2', __name__, url_prefix="/api/v2")
 
@@ -31,3 +31,4 @@ API.add_resource(UserOrdersInTransit,
                  '/users/<int:userId>/in-transit', strict_slashes=False)
 API.add_resource(Users, '/auth/signup', strict_slashes=False)
 API.add_resource(UserSignin, '/auth/login', strict_slashes=False)
+API.add_resource(UserLogout, '/auth/logout', strict_slashes=False)
