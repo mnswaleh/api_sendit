@@ -79,24 +79,24 @@ class TestDeliveryOrders(unittest.TestCase):
         result = json.loads(response.data)
         self.assertIn('access', str(result))
 
-    # def test_signout_user(self):
-    #     """Test endpoint to signout user"""
-    #     self.app.post('/api/v2/auth/signup', data=json.dumps(self.user_data),
-    #                   content_type='application/json')
-    #     user_login = {
-    #         "username": self.user_data['username'], "password": self.user_data['password']}
-    #     response = self.app.post(
-    #         '/api/v2/auth/login', data=json.dumps(user_login), content_type='application/json')
+    def test_signout_user(self):
+        """Test endpoint to signout user"""
+        self.app.post('/api/v2/auth/signup', data=json.dumps(self.user_data),
+                      content_type='application/json')
+        user_login = {
+            "username": self.user_data['username'], "password": self.user_data['password']}
+        response = self.app.post(
+            '/api/v2/auth/login', data=json.dumps(user_login), content_type='application/json')
 
-    #     result = json.loads(response.data)
+        result = json.loads(response.data)
 
-    #     req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
-    #     response = self.app.post(
-    #         '/api/v2/auth/logout', headers=req_header, content_type='application/json')
-    #     self.assertEqual(response.status_code, 201)
+        req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
+        response = self.app.put(
+            '/api/v2/auth/logout', headers=req_header, content_type='application/json')
+        self.assertEqual(response.status_code, 200)
 
-    #     result = json.loads(response.data)
-    #     self.assertIn('successful', str(result))
+        result = json.loads(response.data)
+        self.assertIn('successful', str(result))
 
     def test_create_order(self):
         """Test endpoint to create order"""

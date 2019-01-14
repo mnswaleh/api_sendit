@@ -82,11 +82,9 @@ class UserSignin(Resource):
 class UserLogout(Resource):
     """Signout a loged user"""
     @jwt_required
-    def logout(self):
+    def put(self):
         """Method to signout user"""
-        
-        jti = get_raw_jwt()['jti']
-        return jsonify({"msg": "Successfully logged out"}), 200
+        return make_response(jsonify({"message": "successful logout"}), 200)
 
 
 class UserOrders(Resource):
