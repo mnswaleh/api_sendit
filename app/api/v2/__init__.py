@@ -1,4 +1,4 @@
-"""Initialize version 1"""
+"""Initialize version 2"""
 
 from flask_restful import Api, Resource
 from flask import Blueprint
