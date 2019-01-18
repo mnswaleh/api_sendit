@@ -155,6 +155,7 @@ class OrdersModel():
         return response
 
     def make_user_response(self, parcel_id, update_type, user_data, user_req):
+        """Generate appropriate response for user"""
         response = [
             {"ERROR": "Forbidden access!! You do not have permission to make this change"}, 403]
         result = {}
@@ -286,6 +287,7 @@ class ValidateInputs():
         return message
 
     def validate_username(self, user_name):
+        """CHeck if user name is valid"""
         message = "ok"
         if not user_name.strip():
             message = "username is missing"
@@ -301,6 +303,7 @@ class ValidateInputs():
         return message
 
     def validate_name(self, data_name):
+        """Check if name is valid"""
         message = "ok"
         if not data_name.strip():
             message = "is missing"

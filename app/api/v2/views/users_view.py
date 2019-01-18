@@ -1,9 +1,9 @@
 """Users view Module"""
 
-import app
 from flask import make_response, jsonify
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_raw_jwt
+import app
 from app.api.v2.models.users_model import UsersModel
 from app.api.v2.models.orders_model import OrdersModel, ValidateInputs
 
