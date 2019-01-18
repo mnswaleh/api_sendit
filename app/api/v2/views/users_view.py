@@ -1,5 +1,6 @@
 """Users view Module"""
 
+import app
 from flask import make_response, jsonify
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_raw_jwt
@@ -85,6 +86,8 @@ class UserLogout(Resource):
     @jwt_required
     def put(self):
         """Method to signout user"""
+        jti = get_raw_jwt()['jti']
+        app.blacklist.add(jti)
         return make_response(jsonify({"message": "successful logout"}), 200)
 
 
