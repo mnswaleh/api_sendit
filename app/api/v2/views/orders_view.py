@@ -117,7 +117,7 @@ class DeliveryOrderDeliveryUpdate(Resource):
         data_validation = inputs_validate.confirm_input()
         if data_validation != "ok":
             response = make_response(
-                jsonify({"Error": "Delivery location" + data_validation}), 400)
+                jsonify({"Error": "Delivery location " + data_validation}), 400)
         else:
             result = orders_db.make_user_response(
                 parcelId, 'delivery', data['delivery_location'], user_auth)
@@ -141,7 +141,7 @@ class DeliveryOrderLocation(Resource):
         data_validation = inputs_validate.confirm_input()
         if data_validation != "ok":
             response = make_response(
-                jsonify({"Error": "Current location" + data_validation}), 400)
+                jsonify({"Error": "Current location " + data_validation}), 400)
         else:
             result = orders_db.make_user_response(
                 parcelId, 'location', data['current_location'], user_auth)

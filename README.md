@@ -107,7 +107,12 @@ on terminal: type
 3. should receive response with code 201 with access token eg,
 ```
 {
-    "access:": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDI4MDQ3NTksIm5iZiI6MTU0MjgwNDc1OSwianRpIjoiZDRjNTY3ZTItZDA3YS00ZWNhLThmOWEtN2IxNmM0MmMzMzI5IiwiZXhwIjoxNTQyODA1NjU5LCJpZGVudGl0eSI6WzEsInVzZXIiXSwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIn0.2WS6Q1LD0r6-5F0AFyKTS_bKgfo9SL8A8QZeyVDhCY4"
+    "Message": "Login Successful!",
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDg0NDE3NTYsIm5iZiI6MTU0ODQ0MTc1NiwianRpIjoiYjJhNWZlYjYtZjYzMC00NDBiLWIwM2MtOTA1ODcxMDQ2ZTRmIiwiZXhwIjoxNTQ4NDQyNjU2LCJpZGVudGl0eSI6WzMsInVzZXIiXSwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIn0.Uj_cZzP8fsH9ETbfg3sEk4-QAjO7NlxHwtqZkeL2i-M",
+    "user": [
+        3,
+        "user"
+    ]
 }
 ```
 
@@ -155,7 +160,13 @@ on terminal: type
 3. should receive response with code 201 with access token eg,
 ```
 {
-    "access:": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDI4MDQ3NTksIm5iZiI6MTU0MjgwNDc1OSwianRpIjoiZDRjNTY3ZTItZDA3YS00ZWNhLThmOWEtN2IxNmM0MmMzMzI5IiwiZXhwIjoxNTQyODA1NjU5LCJpZGVudGl0eSI6WzEsInVzZXIiXSwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIn0.2WS6Q1LD0r6-5F0AFyKTS_bKgfo9SL8A8QZeyVDhCY4"
+    "Message": "Login Successful!",
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDg0NDE3OTgsIm5iZiI6MTU0ODQ0MTc5OCwianRpIjoiMGQwYmE0MzAtNjlhZS00Y2U1LWEwNGYtMzZlMTc4NTU0OTgwIiwiZXhwIjoxNTQ4NDQyNjk4LCJpZGVudGl0eSI6WzIsImFkbWluIl0sImZyZXNoIjpmYWxzZSwidHlwZSI6ImFjY2VzcyJ9.Mc_jfZSDq1qHZxhV_5BHtaaRc78oeDbJdGyAYa6KQTU",
+    "user": [
+        2,
+        "admin"
+    ]
+}S6Q1LD0r6-5F0AFyKTS_bKgfo9SL8A8QZeyVDhCY4"
 }
 ```
 
@@ -166,11 +177,10 @@ on terminal: type
 4. send post request with delivery order eg,
 ```
 {
-	"pick up location": "nyahururu",
-	"delivery location": "kitale",
+	"pick_up_location": "nyahururu",
+	"delivery_location": "kitale",
 	"weight": 2,
-	"price": 200,
-	"sender": 1
+	"price": 200
 }
 ```
 5. should receive response with code 201 and order details eg,
@@ -219,15 +229,42 @@ on terminal: type
 5. should receive response with code 200 and all delivery orders created by user with user id 1 ie,
 ```
 {
-    "created": "Tue, 20 Nov 2018 00:00:00 GMT",
-    "current_location": "nyahururu",
-    "destination": "kitale",
-    "order_no": 1,
-    "pickup": "nyahururu",
-    "price": 200,
-    "sender": 1,
-    "status": "pending",
-    "weight": 2
+    "Title": "Delivery orders by user 3",
+    "orders": [
+        {
+            "created": "Fri, 25 Jan 2019 00:00:00 GMT",
+            "current_location": "nyahururu",
+            "destination": "kitale",
+            "order_no": 26,
+            "pickup": "nyahururu",
+            "price": 200,
+            "sender": 3,
+            "status": "pending",
+            "weight": 2
+        },
+        {
+            "created": "Thu, 22 Nov 2018 00:00:00 GMT",
+            "current_location": "nyahururu",
+            "destination": "kitale",
+            "order_no": 5,
+            "pickup": "nyahururu",
+            "price": 200,
+            "sender": 3,
+            "status": "pending",
+            "weight": 1
+        },
+        {
+            "created": "Thu, 22 Nov 2018 00:00:00 GMT",
+            "current_location": "nyahururu",
+            "destination": "kitale",
+            "order_no": 6,
+            "pickup": "nyahururu",
+            "price": 200,
+            "sender": 3,
+            "status": "pending",
+            "weight": 10
+        }
+    ]
 }
 ```
 
@@ -278,7 +315,7 @@ on terminal: type
 4. send put request with desired delivery location eg,
 ```
 {
-	"delivery location": "kisumu"
+	"delivery_location": "kisumu"
 }
 ```
 4. should receive response with code 200 and details of order 1 with new delivery location eg,
@@ -303,7 +340,7 @@ on terminal: type
 4. send put request with current location eg,
 ```
 {
-	"current location": "naivasha"
+	"current_location": "naivasha"
 }
 ```
 5. should receive response with code 200 and details of order 1 with new current location eg,
@@ -354,7 +391,7 @@ on terminal: type
 5. should receive response with code 200 and the number of orders of user 1 that are delivered ie,
 ```
 {
-    "Delivered orders for user 1": 0
+    "delivered": 0
 }
 ```
 
@@ -366,7 +403,38 @@ on terminal: type
 5. should receive response with code 200 and the number of orders of user 1 that are in transit ie,
 ```
 {
-    "Orders in-transit for user 1": 0
+    "in_transit": 0
+}
+```
+
+###### VIEW USER PROFILE
+1. Login as admin or user
+2. Copy the access token and paste it as Bearer Token on headers
+3. Enter URL http://127.0.0.1:5000/api/v2/user/3
+4. send get request 
+5. should receive response with code 200 and details of user 3 ie,
+```
+{
+    "email": "mnswaleh@gmail.com",
+    "firstname": "thomas",
+    "gender": "male",
+    "location": "kakamega",
+    "secondname": "Kalume",
+    "type": "user",
+    "user_id": 3,
+    "username": "tom"
+}
+```
+
+###### USER LOGIN
+1. Login as admin or user
+2. Copy the access token and paste it as Bearer Token on headers
+3. Enter URL http://127.0.0.1:5000/api/v2/auth/logout
+4. send put request 
+5. should receive response with code 200 and a success message ie,
+```
+{
+    "message": "successful logout"
 }
 ```
 

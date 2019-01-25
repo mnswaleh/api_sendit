@@ -287,7 +287,7 @@ class ValidateInputs():
         return message
 
     def validate_username(self, user_name):
-        """CHeck if user name is valid"""
+        """Check if user name is valid"""
         message = "ok"
         if not user_name.strip():
             message = "username is missing"
