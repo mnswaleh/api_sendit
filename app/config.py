@@ -6,6 +6,9 @@ class Config(object):
     DEBUG = True  # Turns on debugging features in Flask
     CSRF_ENABLED = True
     SECRET_KEY = "swalehsenditapi"
+    JWT_SECRET_KEY = "meanemealone"
+    JWT_BLACKLIST_ENABLED = True
+    JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
     DATABASE_URL = "host='localhost' dbname='apisendit' port='5432' user='postgres' password='92203243'"
 
 

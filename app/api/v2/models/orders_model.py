@@ -16,9 +16,9 @@ class OrdersModel():
         """Create order and append it to orders"""
         response = {}
         order = {
-            "pick_up_location": data['pick up location'].lower(),
-            "delivery_location": data['delivery location'].lower(),
-            "current_location": data['pick up location'].lower(),
+            "pick_up_location": data['pick_up_location'].lower(),
+            "delivery_location": data['delivery_location'].lower(),
+            "current_location": data['pick_up_location'].lower(),
             "weight": float(data['weight']),
             "price": float(data['price']),
             "status": "pending",
@@ -155,6 +155,7 @@ class OrdersModel():
         return response
 
     def make_user_response(self, parcel_id, update_type, user_data, user_req):
+        """Generate appropriate response for user"""
         response = [
             {"ERROR": "Forbidden access!! You do not have permission to make this change"}, 403]
         result = {}
@@ -209,12 +210,12 @@ class ValidateInputs():
                 message = self.update_status_inputs()
             elif self.data_for == "change_location":
                 message = self.validate_name(
-                    self.user_input['current location'])
+                    self.user_input['current_location'])
             elif self.data_for == "signin":
                 message = self.user_signin_inputs()
             else:
                 message = self.validate_name(
-                    self.user_input['delivery location'])
+                    self.user_input['delivery_location'])
 
         return message
 
@@ -223,26 +224,26 @@ class ValidateInputs():
         if self.validate_username(self.user_input['username']) != "ok":
             message = self.validate_username(self.user_input['username'])
         elif self.validate_name(self.user_input['first_name']) != "ok":
-            message = "First name " + \
+            message = "first_name, First name " + \
                 self.validate_name(self.user_input['first_name'])
         elif self.validate_name(self.user_input['second_name']) != "ok":
-            message = "Second name " + \
+            message = "second_name, Second name " + \
                 self.validate_name(self.user_input['second_name'])
         elif not validate_email(self.user_input['email']):
             message = "Invalid email"
         elif self.validate_name(self.user_input['location']) != "ok":
-            message = "Location " + \
+            message = "location, Location " + \
                 self.validate_name(self.user_input['location'])
         elif self.user_input['gender'] != "male" and self.user_input['gender'] != "female":
-            message = "gender should be 'male' or 'female'"
+            message = "gender, gender should be 'male' or 'female'"
         elif self.user_input['type'] != "admin" and self.user_input['type'] != "user":
-            message = "user type should be 'admin' or 'user'"
+            message = "type, user type should be 'admin' or 'user'"
         elif not re.match("^[a-zA-Z0-9]{6,20}$", self.user_input['password']):
-            message = "password should have capital letter,small letter, number and be between 6-10 alphanumeric characters"
+            message = "password, password should have capital letter,small letter, number and be between 6-10 alphanumeric characters"
         elif self.user_db.get_username(self.user_input['username']) != "ok":
-            message = "username already exists!!"
+            message = "username, username already exists!!"
         elif self.user_db.get_email(self.user_input['email']) != "ok":
-            message = "email is already registered!!"
+            message = "email, email is already registered!!"
         else:
             message = "ok"
 
@@ -261,12 +262,12 @@ class ValidateInputs():
 
     def create_order_inputs(self):
         """confirm inputs for creating order"""
-        if self.validate_name(self.user_input['pick up location']) != "ok":
-            message = "Pick up location " + \
-                self.validate_name(self.user_input['pick up location'])
-        elif self.validate_name(self.user_input['delivery location']) != "ok":
-            message = "Delivery location " + \
-                self.validate_name(self.user_input['delivery location'])
+        if self.validate_name(self.user_input['pick_up_location']) != "ok":
+            message = "pick_up_location, Pick up location " + \
+                self.validate_name(self.user_input['pick_up_location'])
+        elif self.validate_name(self.user_input['delivery_location']) != "ok":
+            message = "delivery_location, Delivery location " + \
+                self.validate_name(self.user_input['delivery_location'])
         elif not self.user_input['weight'].replace('.', '', 1).isdigit():
             message = "Weight should be decimal number"
         elif not self.user_input['weight'].replace('.', '', 1).isdigit():
@@ -286,6 +287,7 @@ class ValidateInputs():
         return message
 
     def validate_username(self, user_name):
+        """Check if user name is valid"""
         message = "ok"
         if not user_name.strip():
             message = "username is missing"
@@ -301,6 +303,7 @@ class ValidateInputs():
         return message
 
     def validate_name(self, data_name):
+        """Check if name is valid"""
         message = "ok"
         if not data_name.strip():
             message = "is missing"

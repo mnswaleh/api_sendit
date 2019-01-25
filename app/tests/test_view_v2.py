@@ -34,15 +34,15 @@ class TestDeliveryOrders(unittest.TestCase):
         }
 
         self.order_data = {
-            "pick up location": "nanyuki",
-            "delivery location": "nairobi",
+            "pick_up_location": "nanyuki",
+            "delivery_location": "nairobi",
             "weight": 2,
             "price": 2000
         }
 
         self.edit_data = {
-            "delivery location": "narok",
-            "current location": "kikuyu",
+            "delivery_location": "narok",
+            "current_location": "kikuyu",
             "status": "in transit"
         }
 
@@ -79,6 +79,25 @@ class TestDeliveryOrders(unittest.TestCase):
         result = json.loads(response.data)
         self.assertIn('access', str(result))
 
+    def test_signout_user(self):
+        """Test endpoint to signout user"""
+        self.app.post('/api/v2/auth/signup', data=json.dumps(self.user_data),
+                      content_type='application/json')
+        user_login = {
+            "username": self.user_data['username'], "password": self.user_data['password']}
+        response = self.app.post(
+            '/api/v2/auth/login', data=json.dumps(user_login), content_type='application/json')
+
+        result = json.loads(response.data)
+
+        req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
+        response = self.app.put(
+            '/api/v2/auth/logout', headers=req_header, content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        result = json.loads(response.data)
+        self.assertIn('successful', str(result))
+
     def test_create_order(self):
         """Test endpoint to create order"""
         self.app.post('/api/v2/auth/signup', data=json.dumps(self.user_data),
@@ -102,7 +121,7 @@ class TestDeliveryOrders(unittest.TestCase):
                       content_type='application/json')
 
         new_order = self.order_data
-        new_order['pick up location'] = ""
+        new_order['pick_up_location'] = ""
 
         response = self.app.post(
             '/api/v2/parcels', data=json.dumps(new_order), headers=req_header, content_type='application/json')
@@ -128,6 +147,25 @@ class TestDeliveryOrders(unittest.TestCase):
 
         result = json.loads(response.data)
         self.assertIn('order_no', str(result))
+
+    def test_get_userProfile(self):
+        """Test endpoint to fetch user profile"""
+        self.app.post('/api/v2/auth/signup', data=json.dumps(self.user_data),
+                      content_type='application/json')
+        user_login = {
+            "username": self.user_data['username'], "password": self.user_data['password']}
+        response = self.app.post(
+            '/api/v2/auth/login', data=json.dumps(user_login), content_type='application/json')
+
+        result = json.loads(response.data)
+        user_key = result['user']
+        
+        req_header = {'Authorization': 'Bearer {}'.format(result['access'])}
+        response = self.app.get('/api/v2/user/' + str(user_key[0]), headers=req_header, content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        result = json.loads(response.data)
+        self.assertIn('user_id', str(result))
 
     def test_get_specific_order(self):
         """Test endpoint to fetch a specific order"""
@@ -163,7 +201,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        self.assertIn('Delivery orders list', str(result))
+        self.assertIn('Delivery orders', str(result))
 
     def test_cancel_delivery_order(self):
         """Test endpoint to cancel delivery order"""
@@ -254,7 +292,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        self.assertIn('Delivered', str(result))
+        self.assertIn('delivered', str(result))
 
     def test_get_in_transit_orders_for_user(self):
         """Test endpoint to get the number of orders in transit for a specific user"""
@@ -273,7 +311,7 @@ class TestDeliveryOrders(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         result = json.loads(response.data)
-        self.assertIn('in-transit', str(result))
+        self.assertIn('in_transit', str(result))
 
 
 if __name__ == '__main__':
