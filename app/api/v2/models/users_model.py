@@ -109,10 +109,10 @@ class UsersModel():
 
             if flask_bcrypt.check_password_hash(user_data['password'], password):
                 result = user_data
-                user_details = [result['user_id'], result['type']]
-                access_token = create_access_token(identity=user_details)
+                access_token = create_access_token(
+                    identity=[result['user_id'], result['type']])
                 result = {"Message": "Login Successful!",
-                          "user": user_details,
+                          "user": str(result['user_id']) + ',' + result['type'],
                           "access": access_token}
 
         return result
